@@ -1,4 +1,5 @@
 """Tests for API clients."""
+
 import sys
 from pathlib import Path
 

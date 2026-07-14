@@ -1,4 +1,5 @@
 """Sensor entities for Flight Tracker."""
+
 from __future__ import annotations
 
 import logging
@@ -105,10 +106,7 @@ class NearestFlightSensor(FlightTrackerBaseSensor):
         if not flights:
             return None
 
-        nearest = min(
-            flights.values(),
-            key=lambda f: f.distance_km if f.distance_km is not None else float('inf')
-        )
+        nearest = min(flights.values(), key=lambda f: f.distance_km if f.distance_km is not None else float("inf"))
         return round(nearest.distance_km, 1) if nearest.distance_km else None
 
     @property
@@ -118,10 +116,7 @@ class NearestFlightSensor(FlightTrackerBaseSensor):
         if not flights:
             return None
 
-        nearest = min(
-            flights.values(),
-            key=lambda f: f.distance_km if f.distance_km is not None else float('inf')
-        )
+        nearest = min(flights.values(), key=lambda f: f.distance_km if f.distance_km is not None else float("inf"))
 
         return {
             "callsign": nearest.callsign,
@@ -157,10 +152,7 @@ class HighestFlightSensor(FlightTrackerBaseSensor):
         if not flights:
             return None
 
-        highest = max(
-            flights.values(),
-            key=lambda f: f.altitude if f.altitude is not None else -1
-        )
+        highest = max(flights.values(), key=lambda f: f.altitude if f.altitude is not None else -1)
         return highest.altitude if highest.altitude else None
 
     @property
@@ -170,10 +162,7 @@ class HighestFlightSensor(FlightTrackerBaseSensor):
         if not flights:
             return None
 
-        highest = max(
-            flights.values(),
-            key=lambda f: f.altitude if f.altitude is not None else -1
-        )
+        highest = max(flights.values(), key=lambda f: f.altitude if f.altitude is not None else -1)
 
         return {
             "callsign": highest.callsign,
@@ -205,10 +194,7 @@ class FastestFlightSensor(FlightTrackerBaseSensor):
         if not flights:
             return None
 
-        fastest = max(
-            flights.values(),
-            key=lambda f: f.speed if f.speed is not None else -1
-        )
+        fastest = max(flights.values(), key=lambda f: f.speed if f.speed is not None else -1)
         return fastest.speed if fastest.speed else None
 
     @property
@@ -218,10 +204,7 @@ class FastestFlightSensor(FlightTrackerBaseSensor):
         if not flights:
             return None
 
-        fastest = max(
-            flights.values(),
-            key=lambda f: f.speed if f.speed is not None else -1
-        )
+        fastest = max(flights.values(), key=lambda f: f.speed if f.speed is not None else -1)
 
         return {
             "callsign": fastest.callsign,

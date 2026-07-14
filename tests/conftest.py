@@ -1,4 +1,5 @@
 """Test configuration for pytest."""
+
 import sys
 from pathlib import Path
 
@@ -12,6 +13,7 @@ import pytest
 def event_loop():
     """Create event loop for async tests."""
     import asyncio
+
     loop = asyncio.new_event_loop()
     yield loop
     loop.close()
@@ -21,6 +23,7 @@ def event_loop():
 def mock_hass():
     """Mock Home Assistant instance."""
     from unittest.mock import MagicMock
+
     hass = MagicMock()
     hass.config.latitude = 37.7749
     hass.config.longitude = -122.4194
@@ -34,6 +37,7 @@ def mock_config_entry():
     from unittest.mock import MagicMock
 
     from homeassistant.config_entries import ConfigEntry
+
     entry = MagicMock(spec=ConfigEntry)
     entry.data = {
         "latitude": 37.7749,

@@ -1,4 +1,5 @@
 """Config flow for Flight Tracker integration."""
+
 from __future__ import annotations
 
 import voluptuous as vol
@@ -10,6 +11,7 @@ from homeassistant.helpers import selector
 from .const import (
     API_SOURCES,
     CONF_API_SOURCES,
+    CONF_APIS_ENABLED,
     CONF_FILTER_EMERGENCY,
     CONF_FILTER_MILITARY,
     CONF_MAX_ALTITUDE,
@@ -33,9 +35,7 @@ class FlightTrackerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
     MINOR_VERSION = 1
 
-    async def async_step_user(
-        self, user_input: dict | None = None
-    ) -> FlowResult:
+    async def async_step_user(self, user_input: dict | None = None) -> FlowResult:
         """Handle the initial step."""
         errors: dict[str, str] = {}
 
@@ -52,7 +52,7 @@ class FlightTrackerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
                 return self.async_create_entry(
                     title=f"Flight Tracker ({lat:.4f}, {lon:.4f})",
-                    data=user_input,
+                    data={**user_input, CONF_APIS_ENABLED: user_input.get(CONF_API_SOURCES, DEFAULT_API_SOURCES)},
                 )
 
         # Default to HA location
@@ -95,7 +95,7 @@ class FlightTrackerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         unit_of_measurement="seconds",
                     )
                 ),
-                vol.Required(CONF_API_SOURCES, default=DEFAULT_API_SOURCES): selector.SelectSelector(
+                vol.Required(CONF_APIS_ENABLED, default=DEFAULT_API_SOURCES): selector.SelectSelector(
                     selector.SelectSelectorConfig(
                         options=list(API_SOURCES.keys()),
                         translation_key="api_sources",
@@ -141,8 +141,6 @@ class FlightTrackerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             },
         )
 
-    async def async_step_reconfigure(
-        self, user_input: dict | None = None
-    ) -> FlowResult:
+    async def async_step_reconfigure(self, user_input: dict | None = None) -> FlowResult:
         """Handle reconfiguration."""
         return await self.async_step_user(user_input)

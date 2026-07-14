@@ -1,4 +1,5 @@
 """Services for Flight Tracker integration."""
+
 from __future__ import annotations
 
 import logging
@@ -105,9 +106,7 @@ async def async_setup_services(hass: HomeAssistant) -> None:
                     }
                 else:
                     # Try to fetch
-                    image_url = await coordinator.planespotters.get_image_url(
-                        flight.icao24, flight.registration
-                    )
+                    image_url = await coordinator.planespotters.get_image_url(flight.icao24, flight.registration)
                     if image_url:
                         flight.image_url = image_url
                         return {
@@ -122,17 +121,16 @@ async def async_setup_services(hass: HomeAssistant) -> None:
         return {"success": False, "error": "Flight not found"}
 
     # Register services
-    hass.services.async_register(
-        DOMAIN, SERVICE_REFRESH, handle_refresh, schema=REFRESH_SCHEMA
-    )
+    hass.services.async_register(DOMAIN, SERVICE_REFRESH, handle_refresh, schema=REFRESH_SCHEMA)
+
+    hass.services.async_register(DOMAIN, SERVICE_CENTER_MAP, handle_center_map, schema=CENTER_MAP_SCHEMA)
 
     hass.services.async_register(
-        DOMAIN, SERVICE_CENTER_MAP, handle_center_map, schema=CENTER_MAP_SCHEMA
-    )
-
-    hass.services.async_register(
-        DOMAIN, SERVICE_GET_FLIGHT_IMAGE, handle_get_flight_image,
-        schema=GET_FLIGHT_IMAGE_SCHEMA, supports_response=SupportsResponse.ONLY
+        DOMAIN,
+        SERVICE_GET_FLIGHT_IMAGE,
+        handle_get_flight_image,
+        schema=GET_FLIGHT_IMAGE_SCHEMA,
+        supports_response=SupportsResponse.ONLY,
     )
 
     _LOGGER.info("Flight Tracker services registered")

@@ -1,4 +1,5 @@
 """API client for Planespotters image service."""
+
 from __future__ import annotations
 
 import asyncio
@@ -19,6 +20,7 @@ _LOGGER = logging.getLogger(__name__)
 @dataclass
 class AircraftImage:
     """Aircraft image from Planespotters."""
+
     url: str
     thumbnail: str
     registration: str

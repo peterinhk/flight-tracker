@@ -1,4 +1,5 @@
 """Device tracker entities for Flight Tracker integration."""
+
 from __future__ import annotations
 
 import logging

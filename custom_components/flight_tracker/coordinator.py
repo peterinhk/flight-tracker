@@ -1,4 +1,5 @@
 """Data coordinator for Flight Tracker integration."""
+
 from __future__ import annotations
 
 import asyncio
@@ -45,6 +46,7 @@ _LOGGER = logging.getLogger(__name__)
 @dataclass
 class Flight:
     """Normalized flight data from all sources."""
+
     hex: str
     callsign: str | None = None
     registration: str | None = None
@@ -76,12 +78,14 @@ class Flight:
             self.icao24 = self.hex
         if self.category_label is None and self.category is not None:
             from .const import CATEGORY_LABELS
+
             self.category_label = CATEGORY_LABELS.get(self.category, "Unknown")
 
 
 @dataclass
 class CoordinatorData:
     """Data held by coordinator."""
+
     flights: dict[str, Flight] = field(default_factory=dict)  # hex -> Flight
     stats: dict[str, Any] = field(default_factory=dict)
     last_update: float = 0
@@ -171,6 +175,7 @@ class FlightTrackerCoordinator(DataUpdateCoordinator[CoordinatorData]):
 
         if self.planespotters_email:
             from pathlib import Path
+
             cache_dir = Path(self.hass.config.path("storage", "flight_tracker"))
             self.planespotters = PlanespottersClient(
                 self.session,
@@ -220,13 +225,15 @@ class FlightTrackerCoordinator(DataUpdateCoordinator[CoordinatorData]):
 
         # Fetch images for new/updated flights
         if self.planespotters and filtered_flights:
-            await self.planespotters.preload_images([
-                {
-                    "hex": f.hex,
-                    "registration": f.registration,
-                }
-                for f in filtered_flights.values()
-            ])
+            await self.planespotters.preload_images(
+                [
+                    {
+                        "hex": f.hex,
+                        "registration": f.registration,
+                    }
+                    for f in filtered_flights.values()
+                ]
+            )
             # Update image URLs
             for flight in filtered_flights.values():
                 if flight.hex:
@@ -271,18 +278,18 @@ class FlightTrackerCoordinator(DataUpdateCoordinator[CoordinatorData]):
             latitude=raw.lat,
             longitude=raw.lon,
             altitude=raw.alt_baro,
-            altitude_geometric=raw.alt_geom if hasattr(raw, 'alt_geom') else None,
+            altitude_geometric=raw.alt_geom if hasattr(raw, "alt_geom") else None,
             speed=raw.gs,
             heading=raw.track,
-            vertical_rate=raw.baro_rate if hasattr(raw, 'baro_rate') else None,
+            vertical_rate=raw.baro_rate if hasattr(raw, "baro_rate") else None,
             squawk=raw.squawk,
             category=raw.category,
             aircraft_type=raw.t,
             operator=None,
             source_api=source,
-            rssi=raw.rssi if hasattr(raw, 'rssi') else None,
+            rssi=raw.rssi if hasattr(raw, "rssi") else None,
             last_seen=raw.seen,
-            last_seen_pos=raw.seen_pos if hasattr(raw, 'seen_pos') else None,
+            last_seen_pos=raw.seen_pos if hasattr(raw, "seen_pos") else None,
         )
 
     def _merge_flight(self, flights: dict[str, Flight], new_flight: Flight) -> None:
@@ -303,11 +310,24 @@ class FlightTrackerCoordinator(DataUpdateCoordinator[CoordinatorData]):
     def _merge_fields(self, existing: Flight, new: Flight) -> None:
         """Merge fields from new flight into existing."""
         for field_name in [
-            "callsign", "registration", "latitude", "longitude",
-            "altitude", "altitude_geometric", "speed", "heading",
-            "vertical_rate", "squawk", "category", "aircraft_type",
-            "operator", "image_url", "last_seen", "last_seen_pos",
-            "source_api", "rssi",
+            "callsign",
+            "registration",
+            "latitude",
+            "longitude",
+            "altitude",
+            "altitude_geometric",
+            "speed",
+            "heading",
+            "vertical_rate",
+            "squawk",
+            "category",
+            "aircraft_type",
+            "operator",
+            "image_url",
+            "last_seen",
+            "last_seen_pos",
+            "source_api",
+            "rssi",
         ]:
             new_val = getattr(new, field_name)
             if new_val is not None:
@@ -323,10 +343,7 @@ class FlightTrackerCoordinator(DataUpdateCoordinator[CoordinatorData]):
                 continue
 
             # Distance check
-            distance = self._calculate_distance(
-                self.latitude, self.longitude,
-                flight.latitude, flight.longitude
-            )
+            distance = self._calculate_distance(self.latitude, self.longitude, flight.latitude, flight.longitude)
             flight.distance_km = distance
             if distance > self.radius_km:
                 continue
@@ -348,11 +365,8 @@ class FlightTrackerCoordinator(DataUpdateCoordinator[CoordinatorData]):
         # Limit entities
         if len(filtered) > self.max_entities:
             # Sort by distance (closest first)
-            sorted_flights = sorted(
-                filtered.items(),
-                key=lambda x: x[1].distance_km or float('inf')
-            )
-            filtered = dict(sorted_flights[:self.max_entities])
+            sorted_flights = sorted(filtered.items(), key=lambda x: x[1].distance_km or float("inf"))
+            filtered = dict(sorted_flights[: self.max_entities])
 
         return filtered
 
@@ -362,8 +376,8 @@ class FlightTrackerCoordinator(DataUpdateCoordinator[CoordinatorData]):
         lat1, lon1, lat2, lon2 = map(math.radians, [lat1, lon1, lat2, lon2])
         dlat = lat2 - lat1
         dlon = lon2 - lon1
-        a = math.sin(dlat/2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon/2)**2
-        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+        a = math.sin(dlat / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) ** 2
+        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
         return R * c
 
     def _update_stats(self) -> None:
@@ -393,7 +407,7 @@ class FlightTrackerCoordinator(DataUpdateCoordinator[CoordinatorData]):
         new_flights: dict[str, Flight] = {}
         for raw in flights:
             # Determine source from raw data - ADSB.fi has rssi, ADSB.lol doesn't
-            source = "adsb_fi" if hasattr(raw, 'rssi') and raw.rssi is not None else "adsb_lol"
+            source = "adsb_fi" if hasattr(raw, "rssi") and raw.rssi is not None else "adsb_lol"
             flight = self._normalize_flight(raw, source)
             self._merge_flight(new_flights, flight)
 

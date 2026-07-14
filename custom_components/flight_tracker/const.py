@@ -1,4 +1,5 @@
 """Constants for Flight Tracker integration."""
+
 from __future__ import annotations
 
 from homeassistant.const import Platform
@@ -20,11 +21,15 @@ CONF_RADIUS_KM = "radius_km"
 CONF_SCAN_INTERVAL = "scan_interval"
 CONF_ENABLE_WEBSOCKET = "enable_websocket"
 CONF_APIS_ENABLED = "apis_enabled"
+CONF_API_SOURCES = "api_sources"  # alias for config flow
 CONF_PLANESPOTTERS_EMAIL = "planespotters_email"
 CONF_MIN_ALTITUDE = "min_altitude"
 CONF_MAX_ALTITUDE = "max_altitude"
 CONF_TRACK_MILITARY = "track_military"
+CONF_FILTER_MILITARY = "filter_military"  # alias for config flow
+CONF_FILTER_EMERGENCY = "filter_emergency"
 CONF_TRACK_GA = "track_ga"
+CONF_SHOW_ON_MAP = "show_on_map"
 CONF_MAX_ENTITIES = "max_entities"
 
 # Defaults
@@ -34,8 +39,13 @@ DEFAULT_ENABLE_WEBSOCKET = True
 DEFAULT_MIN_ALTITUDE = 0  # feet
 DEFAULT_MAX_ALTITUDE = 60000  # feet
 DEFAULT_TRACK_MILITARY = False
+DEFAULT_FILTER_MILITARY = False
+DEFAULT_FILTER_EMERGENCY = False
 DEFAULT_TRACK_GA = True
+DEFAULT_SHOW_ON_MAP = True
 DEFAULT_MAX_ENTITIES = 100
+DEFAULT_API_SOURCES = ["adsb_fi", "adsb_lol"]
+DEFAULT_APIS_ENABLED = ["adsb_fi", "adsb_lol"]
 
 # API endpoints
 ADSB_FI_REST = "https://api.adsb.fi/v2"
@@ -49,6 +59,16 @@ ADSB_COM_REST = "https://api.adsb.com/v1"  # May require API key
 ADSB_COM_WS = "wss://api.adsb.com/v1/ws"
 
 PLANESPOTTERS_API = "https://api.planespotters.net/pub"
+
+# API Sources for config flow
+API_SOURCES = {
+    "adsb_fi": "ADSB.fi",
+    "adsb_lol": "ADSB.lol",
+    "adsb_com": "ADSB.com",
+}
+API_SOURCE_ADSB_FI = "adsb_fi"
+API_SOURCE_ADSB_LOL = "adsb_lol"
+API_SOURCE_ADSB_COM = "adsb_com"
 
 # Aircraft categories (from ADSB spec)
 CATEGORY_NONE = 0

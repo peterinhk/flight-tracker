@@ -2,6 +2,7 @@
 
 Aggregates live flight data from ADSB.fi, ADSB.lol, ADSB.com and Planespotters.
 """
+
 from __future__ import annotations
 
 import logging

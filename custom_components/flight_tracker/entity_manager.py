@@ -1,4 +1,5 @@
 """Entity manager for dynamic flight device trackers."""
+
 from __future__ import annotations
 
 import logging
@@ -37,10 +38,7 @@ class FlightTrackerEntityManager:
         # Add new entities
         new_flights = current_flights - existing_entities
         if new_flights:
-            new_entities = [
-                FlightDeviceTracker(self.coordinator, hex_code)
-                for hex_code in new_flights
-            ]
+            new_entities = [FlightDeviceTracker(self.coordinator, hex_code) for hex_code in new_flights]
             self.async_add_entities(new_entities)
             for entity in new_entities:
                 self._entities[entity._flight_hex] = entity

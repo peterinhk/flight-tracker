@@ -1,4 +1,5 @@
 """API client for ADSB.fi."""
+
 from __future__ import annotations
 
 import asyncio
@@ -22,6 +23,7 @@ _LOGGER = logging.getLogger(__name__)
 @dataclass
 class FlightData:
     """Flight data from ADSB.fi."""
+
     hex: str
     flight: str | None = None
     r: str | None = None  # registration

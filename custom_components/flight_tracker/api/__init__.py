@@ -1,4 +1,5 @@
 """API clients for flight tracking data sources."""
+
 from __future__ import annotations
 
 import asyncio
@@ -19,6 +20,7 @@ _LOGGER = logging.getLogger(__name__)
 @dataclass
 class FlightData:
     """Raw flight data from API."""
+
     hex: str
     flight: str | None = None
     r: str | None = None  # registration
@@ -287,6 +289,7 @@ class PlanespottersClient:
         try:
             if self._cache_file.exists():
                 import json
+
                 content = self._cache_file.read_text()
                 self._cache = json.loads(content)
                 _LOGGER.debug("Loaded %d cached images", len(self._cache))
@@ -298,9 +301,10 @@ class PlanespottersClient:
         """Save image cache to disk."""
         try:
             import json
+
             self._cache_dir.mkdir(parents=True, exist_ok=True)
             content = json.dumps(self._cache)
-            await aiofiles.open(self._cache_file, 'w').write(content)
+            await aiofiles.open(self._cache_file, "w").write(content)
         except Exception as err:
             _LOGGER.warning("Failed to save image cache: %s", err)
 
