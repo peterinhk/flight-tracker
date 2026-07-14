@@ -1,0 +1,240 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Flight Tracker Configuration",
+        "description": "Configure the Flight Tracker integration to display live flights on your map.",
+        "data": {
+          "latitude": {
+            "name": "Latitude",
+            "description": "Center latitude for flight tracking radius"
+          },
+          "longitude": {
+            "name": "Longitude",
+            "description": "Center longitude for flight tracking radius"
+          },
+          "radius_km": {
+            "name": "Radius (km)",
+            "description": "Tracking radius around the center point"
+          },
+          "scan_interval": {
+            "name": "Scan Interval (seconds)",
+            "description": "How often to poll REST APIs (WebSocket provides live updates)"
+          },
+          "apis_enabled": {
+            "name": "Enabled APIs",
+            "description": "Select which flight data sources to use"
+          },
+          "planespotters_email": {
+            "name": "Planespotters Email",
+            "description": "Email for Planespotters API (required for aircraft images)"
+          },
+          "min_altitude": {
+            "name": "Minimum Altitude (ft)",
+            "description": "Filter out flights below this altitude"
+          },
+          "max_altitude": {
+            "name": "Maximum Altitude (ft)",
+            "description": "Filter out flights above this altitude"
+          },
+          "track_military": {
+            "name": "Track Military Aircraft",
+            "description": "Include military/heavy aircraft in results"
+          },
+          "track_ga": {
+            "name": "Track General Aviation",
+            "description": "Include light/small aircraft in results"
+          },
+          "show_on_map": {
+            "name": "Show on Map",
+            "description": "Display flights on the Home Assistant map"
+          }
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "This location is already configured"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Flight Tracker Options",
+        "description": "Adjust Flight Tracker settings",
+        "data": {
+          "radius_km": {
+            "name": "Radius (km)",
+            "description": "Tracking radius around the center point"
+          },
+          "scan_interval": {
+            "name": "Scan Interval (seconds)",
+            "description": "How often to poll REST APIs"
+          },
+          "apis_enabled": {
+            "name": "Enabled APIs",
+            "description": "Select which flight data sources to use"
+          },
+          "planespotters_email": {
+            "name": "Planespotters Email",
+            "description": "Email for Planespotters API (required for aircraft images)"
+          },
+          "min_altitude": {
+            "name": "Minimum Altitude (ft)",
+            "description": "Filter out flights below this altitude"
+          },
+          "max_altitude": {
+            "name": "Maximum Altitude (ft)",
+            "description": "Filter out flights above this altitude"
+          },
+          "track_military": {
+            "name": "Track Military Aircraft",
+            "description": "Include military/heavy aircraft in results"
+          },
+          "track_ga": {
+            "name": "Track General Aviation",
+            "description": "Include light/small aircraft in results"
+          },
+          "show_on_map": {
+            "name": "Show on Map",
+            "description": "Display flights on the Home Assistant map"
+          }
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "total_flights": {
+        "name": "Total Flights",
+        "state_attributes": {
+          "in_radius": "Flights in Radius",
+          "by_category": "By Category",
+          "by_source": "By Source"
+        }
+      },
+      "nearest_flight": {
+        "name": "Nearest Flight",
+        "state_attributes": {
+          "callsign": "Callsign",
+          "registration": "Registration",
+          "altitude": "Altitude",
+          "speed": "Speed",
+          "aircraft_type": "Aircraft Type",
+          "image_url": "Image URL"
+        }
+      },
+      "highest_flight": {
+        "name": "Highest Flight",
+        "state_attributes": {
+          "callsign": "Callsign",
+          "registration": "Registration",
+          "altitude": "Altitude",
+          "aircraft_type": "Aircraft Type"
+        }
+      },
+      "fastest_flight": {
+        "name": "Fastest Flight",
+        "state_attributes": {
+          "callsign": "Callsign",
+          "registration": "Registration",
+          "speed": "Speed",
+          "aircraft_type": "Aircraft Type"
+        }
+      },
+      "images_cached": {
+        "name": "Images Cached",
+        "state_attributes": {
+          "total_entries": "Total Cache Entries",
+          "entries_with_images": "Entries with Images",
+          "negative_entries": "Negative Cache Entries"
+        }
+      },
+      "category_breakdown": {
+        "name": "Category Breakdown",
+        "state_attributes": {
+          "categories": "Categories"
+        }
+      },
+      "source_breakdown": {
+        "name": "Source Breakdown",
+        "state_attributes": {
+          "sources": "Sources"
+        }
+      }
+    },
+    "device_tracker": {
+      "flight": {
+        "name": "Flight",
+        "state_attributes": {
+          "callsign": "Callsign",
+          "registration": "Registration",
+          "icao24": "ICAO24",
+          "altitude": "Altitude",
+          "speed": "Speed",
+          "heading": "Heading",
+          "vertical_rate": "Vertical Rate",
+          "squawk": "Squawk",
+          "category": "Category",
+          "category_label": "Category Label",
+          "aircraft_type": "Aircraft Type",
+          "operator": "Operator",
+          "origin": "Origin",
+          "destination": "Destination",
+          "image_url": "Image URL",
+          "last_seen": "Last Seen",
+          "source_api": "Source API",
+          "rssi": "Signal Strength",
+          "distance_km": "Distance (km)"
+        }
+      }
+    }
+  },
+  "services": {
+    "refresh": {
+      "name": "Refresh",
+      "description": "Manually refresh flight data from all APIs",
+      "fields": {
+        "source": {
+          "name": "Source",
+          "description": "Specific API source to refresh (optional)"
+        }
+      }
+    },
+    "center_map": {
+      "name": "Center Map",
+      "description": "Center the map on specific coordinates",
+      "fields": {
+        "latitude": {
+          "name": "Latitude",
+          "description": "Latitude to center on"
+        },
+        "longitude": {
+          "name": "Longitude",
+          "description": "Longitude to center on"
+        },
+        "zoom": {
+          "name": "Zoom",
+          "description": "Map zoom level (1-18)"
+        }
+      }
+    },
+    "get_flight_image": {
+      "name": "Get Flight Image",
+      "description": "Get aircraft image URL by callsign, registration, or hex",
+      "fields": {
+        "callsign": {
+          "name": "Callsign",
+          "description": "Flight callsign"
+        },
+        "registration": {
+          "name": "Registration",
+          "description": "Aircraft registration"
+        },
+        "icao24": {
+          "name": "ICAO24",
+          "description": "ICAO 24-bit hex address"
+        }
+      }
+    }
+  }
+}

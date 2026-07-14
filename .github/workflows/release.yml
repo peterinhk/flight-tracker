@@ -1,0 +1,48 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Hatch
+        run: pip install hatch
+
+      - name: Build package
+        run: hatch build
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dist/*
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Validate HACS
+        run: |
+          python -c "
+          import json
+          with open('hacs.json') as f:
+              hacs = json.load(f)
+          import re
+          version = re.search(r'v(.+)', '${{ github.ref_name }}').group(1)
+          assert hacs['version'] == version, f'Version mismatch: hacs.json={hacs[\"version\"]} tag={version}'
+          print(f'Version {version} matches hacs.json')
+          "

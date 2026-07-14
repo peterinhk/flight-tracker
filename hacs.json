@@ -1,0 +1,39 @@
+{
+  "name": "Flight Tracker",
+  "content_in_root": false,
+  "filename": "custom_components/flight_tracker",
+  "domains": ["flight_tracker"],
+  "version": "1.0.0",
+  "minimum_ha_version": "2024.1.0",
+  "requirements": ["aiohttp>=3.9.0", "aiofiles>=23.0.0"],
+  "hass_dependencies": ["device_tracker", "sensor", "websocket_api"],
+  "translations": ["en"],
+  "config_flow": true,
+  "documentation": "https://github.com/peterjurgens/flight-tracker/blob/main/README.md",
+  "issue_tracker": "https://github.com/peterjurgens/flight-tracker/issues",
+  "home_assistant_services": [
+    {
+      "name": "refresh",
+      "description": "Manually refresh flight data from all APIs"
+    },
+    {
+      "name": "center_map",
+      "description": "Center the map on specific coordinates",
+      "fields": {
+        "latitude": {"description": "Latitude", "required": true},
+        "longitude": {"description": "Longitude", "required": true},
+        "zoom": {"description": "Map zoom level (1-18)", "required": false}
+      }
+    },
+    {
+      "name": "get_flight_image",
+      "description": "Get aircraft image URL by callsign, registration, or hex",
+      "fields": {
+        "callsign": {"description": "Flight callsign", "required": false},
+        "registration": {"description": "Aircraft registration", "required": false},
+        "icao24": {"description": "ICAO 24-bit hex address", "required": false}
+      },
+      "response": true
+    }
+  ]
+}

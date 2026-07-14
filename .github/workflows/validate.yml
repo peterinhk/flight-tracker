@@ -1,0 +1,47 @@
+name: Validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install -e .[dev]
+          pip install homeassistant==2024.1.0
+
+      - name: Lint with Ruff
+        run: ruff check custom_components/flight_tracker tests/
+
+      - name: Format check with Ruff
+        run: ruff format --check custom_components/flight_tracker tests/
+
+      - name: Type check with MyPy
+        run: mypy custom_components/flight_tracker
+
+      - name: Validate HACS manifest
+        run: |
+          python -c "
+          import json
+          with open('hacs.json') as f:
+              data = json.load(f)
+          required = ['name', 'content_in_root', 'filename', 'domains', 'version', 'minimum_ha_version']
+          for field in required:
+              assert field in data, f'Missing required field: {field}'
+          print('HACS manifest valid')
+          "
+
+      - name: Run tests
+        run: pytest tests/ -v
