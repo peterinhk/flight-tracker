@@ -15,31 +15,30 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
-    ATTR_CALLSIGN,
-    ATTR_REGISTRATION,
-    ATTR_ICAO24,
+    ATTR_AIRCRAFT_TYPE,
     ATTR_ALTITUDE,
     ATTR_ALTITUDE_GEOMETRIC,
-    ATTR_SPEED,
-    ATTR_HEADING,
-    ATTR_VERTICAL_RATE,
-    ATTR_SQUAWK,
+    ATTR_CALLSIGN,
     ATTR_CATEGORY,
     ATTR_CATEGORY_LABEL,
-    ATTR_AIRCRAFT_TYPE,
-    ATTR_OPERATOR,
-    ATTR_ORIGIN,
     ATTR_DESTINATION,
+    ATTR_DISTANCE_KM,
+    ATTR_HEADING,
+    ATTR_ICAO24,
     ATTR_IMAGE_URL,
     ATTR_LAST_SEEN,
-    ATTR_SOURCE_API,
+    ATTR_OPERATOR,
+    ATTR_ORIGIN,
+    ATTR_REGISTRATION,
     ATTR_RSSI,
-    ATTR_DISTANCE_KM,
-    DEVICE_TRACKER_PREFIX,
+    ATTR_SOURCE_API,
+    ATTR_SPEED,
+    ATTR_SQUAWK,
+    ATTR_VERTICAL_RATE,
     DEVICE_TRACKER_ICON,
     DOMAIN,
 )
-from .coordinator import FlightTrackerCoordinator, FlightTrackerEntityManager
+from .coordinator import Flight, FlightTrackerCoordinator, FlightTrackerEntityManager
 
 _LOGGER = logging.getLogger(__name__)
 

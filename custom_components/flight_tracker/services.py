@@ -9,13 +9,13 @@ from homeassistant.core import HomeAssistant, ServiceCall, SupportsResponse
 from homeassistant.helpers import config_validation as cv
 
 from .const import (
+    ATTR_CALLSIGN,
+    ATTR_ICAO24,
+    ATTR_REGISTRATION,
     DOMAIN,
-    SERVICE_REFRESH,
     SERVICE_CENTER_MAP,
     SERVICE_GET_FLIGHT_IMAGE,
-    ATTR_CALLSIGN,
-    ATTR_REGISTRATION,
-    ATTR_ICAO24,
+    SERVICE_REFRESH,
 )
 from .coordinator import FlightTrackerCoordinator
 

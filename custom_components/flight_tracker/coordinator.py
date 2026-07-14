@@ -13,7 +13,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
-from .api import ADSBFiClient, ADSBLolClient, ADSBComClient, PlanespottersClient
+from .api import ADSBComClient, ADSBFiClient, ADSBLolClient, PlanespottersClient
 from .const import (
     CONF_APIS_ENABLED,
     CONF_ENABLE_WEBSOCKET,
@@ -36,7 +36,6 @@ from .const import (
     DEFAULT_TRACK_GA,
     DEFAULT_TRACK_MILITARY,
     DOMAIN,
-    ENTITY_STALE_THRESHOLD_SECONDS,
 )
 from .entity_manager import FlightTrackerEntityManager
 
@@ -134,7 +133,10 @@ class FlightTrackerCoordinator(DataUpdateCoordinator[CoordinatorData]):
 
     async def _async_setup(self) -> None:
         """Set up API clients."""
-        user_agent = f"FlightTracker/1.0 ({self.planespotters_email})" if self.planespotters_email else "FlightTracker/1.0"
+        if self.planespotters_email:
+            user_agent = f"FlightTracker/1.0 ({self.planespotters_email})"
+        else:
+            user_agent = "FlightTracker/1.0"
 
         if "adsb_fi" in self.apis_enabled:
             self._adsb_fi = ADSBFiClient(
@@ -397,7 +399,7 @@ class FlightTrackerCoordinator(DataUpdateCoordinator[CoordinatorData]):
 
         # Filter and merge
         filtered = self._filter_flights(new_flights)
-        for hex_code, flight in filtered.items():
+        for _hex_code, flight in filtered.items():
             self._merge_flight(self.data.flights, flight)
 
         # Update stats

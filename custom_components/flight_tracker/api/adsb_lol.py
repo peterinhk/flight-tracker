@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import json
 import logging
 from dataclasses import dataclass
@@ -79,7 +80,7 @@ class ADSBLolClient:
                 else:
                     _LOGGER.warning("ADSB.lol REST error: %s", resp.status)
                     return []
-        except asyncio.TimeoutError:
+        except TimeoutError:
             _LOGGER.warning("ADSB.lol REST timeout")
             return []
         except Exception as err:
@@ -126,10 +127,8 @@ class ADSBLolClient:
         """Stop WebSocket connection."""
         if self._ws_task and not self._ws_task.done():
             self._ws_task.cancel()
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await self._ws_task
-            except asyncio.CancelledError:
-                pass
 
     async def _websocket_loop(self) -> None:
         """WebSocket connection loop with auto-reconnect."""

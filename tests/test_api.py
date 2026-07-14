@@ -1,7 +1,12 @@
 """Tests for API clients."""
+import sys
+from pathlib import Path
+
+# Add project root to path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
-import json
 
 from custom_components.flight_tracker.api import ADSBFiClient, ADSBLolClient, PlanespottersClient
 

@@ -19,8 +19,8 @@ jobs:
 
       - name: Install dependencies
         run: |
+          pip install --upgrade pip
           pip install -e .[dev]
-          pip install homeassistant==2024.1.0
 
       - name: Lint with Ruff
         run: ruff check custom_components/flight_tracker tests/

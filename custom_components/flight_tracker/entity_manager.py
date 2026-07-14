@@ -4,10 +4,10 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from homeassistant.core import HomeAssistant, callback
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN, ENTITY_STALE_THRESHOLD_SECONDS
+from .const import ENTITY_STALE_THRESHOLD_SECONDS
 from .device_tracker import FlightDeviceTracker
 
 _LOGGER = logging.getLogger(__name__)
@@ -62,13 +62,12 @@ class FlightTrackerEntityManager:
         to_remove = []
 
         for hex_code, stale_time in self._stale_timestamps.items():
-            if now - stale_time > ENTITY_STALE_THRESHOLD_SECONDS:
-                if hex_code in self._entities:
-                    entity = self._entities[hex_code]
-                    await entity.async_remove()
-                    del self._entities[hex_code]
-                    to_remove.append(hex_code)
-                    _LOGGER.debug("Removed stale flight entity: %s", hex_code)
+            if now - stale_time > ENTITY_STALE_THRESHOLD_SECONDS and hex_code in self._entities:
+                entity = self._entities[hex_code]
+                await entity.async_remove()
+                del self._entities[hex_code]
+                to_remove.append(hex_code)
+                _LOGGER.debug("Removed stale flight entity: %s", hex_code)
 
         for hex_code in to_remove:
             del self._stale_timestamps[hex_code]
@@ -77,6 +76,5 @@ class FlightTrackerEntityManager:
         """Clean up entities not in current flight list."""
         current_set = set(current_flight_hexes)
         for hex_code in list(self._entities.keys()):
-            if hex_code not in current_set:
-                if hex_code not in self._stale_timestamps:
-                    self._stale_timestamps[hex_code] = self.hass.loop.time()
+            if hex_code not in current_set and hex_code not in self._stale_timestamps:
+                self._stale_timestamps[hex_code] = self.hass.loop.time()

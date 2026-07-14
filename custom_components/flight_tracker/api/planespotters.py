@@ -49,7 +49,7 @@ class PlanespottersClient:
         """Load cache from disk."""
         try:
             if self._cache_file.exists():
-                with open(self._cache_file, "r") as f:
+                with open(self._cache_file) as f:
                     self._cache = json.load(f)
                 _LOGGER.debug("Loaded Planespotters cache: %d entries", len(self._cache))
         except Exception as err:
@@ -138,7 +138,7 @@ class PlanespottersClient:
                     _LOGGER.debug("No images found for %s", url)
                 else:
                     _LOGGER.warning("Planespotters API error: %s", resp.status)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             _LOGGER.warning("Planespotters API timeout")
         except Exception as err:
             _LOGGER.error("Planespotters API error: %s", err)

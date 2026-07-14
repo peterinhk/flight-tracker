@@ -1,5 +1,5 @@
-"""
-Flight Tracker - Home Assistant Custom Integration
+"""Flight Tracker - Home Assistant Custom Integration
+
 Aggregates live flight data from ADSB.fi, ADSB.lol, ADSB.com and Planespotters.
 """
 from __future__ import annotations
@@ -8,10 +8,10 @@ import logging
 from typing import TYPE_CHECKING
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 
-from .const import DOMAIN, PLATFORMS
+from .const import DOMAIN as DOMAIN
+from .const import PLATFORMS
 from .coordinator import FlightTrackerCoordinator
 
 if TYPE_CHECKING:

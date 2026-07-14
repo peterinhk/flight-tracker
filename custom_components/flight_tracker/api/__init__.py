@@ -2,15 +2,16 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import json
 import logging
 import time
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
-import aiohttp
 import aiofiles
-from pathlib import Path
+import aiohttp
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -83,10 +84,8 @@ class BaseAPIClient:
         self._shutdown = True
         if self._ws_task and not self._ws_task.done():
             self._ws_task.cancel()
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await self._ws_task
-            except asyncio.CancelledError:
-                pass
 
     def _parse_flights(self, data: dict[str, Any]) -> list[FlightData]:
         """Parse flights from API response."""
@@ -143,7 +142,7 @@ class ADSBFiClient(BaseAPIClient):
                 else:
                     _LOGGER.warning("ADSB.fi REST error: %s", resp.status)
                     return []
-        except asyncio.TimeoutError:
+        except TimeoutError:
             _LOGGER.warning("ADSB.fi REST timeout")
             return []
         except Exception as err:
@@ -214,7 +213,7 @@ class ADSBLolClient(BaseAPIClient):
                 else:
                     _LOGGER.warning("ADSB.lol REST error: %s", resp.status)
                     return []
-        except asyncio.TimeoutError:
+        except TimeoutError:
             _LOGGER.warning("ADSB.lol REST timeout")
             return []
         except Exception as err:
@@ -307,7 +306,7 @@ class PlanespottersClient:
 
     def get_stats(self) -> dict:
         """Get cache statistics."""
-        now = time.time()
+        time.time()
         entries_with_images = sum(1 for v in self._cache.values() if v.get("url"))
         return {
             "total_entries": len(self._cache),
@@ -322,13 +321,12 @@ class PlanespottersClient:
         # Check positive cache
         if hex_code in self._cache:
             entry = self._cache[hex_code]
-            if entry.get("url") and (now := time.time()) - entry.get("timestamp", 0) < 86400:  # 24h
+            if entry.get("url") and time.time() - entry.get("timestamp", 0) < 86400:  # 24h
                 return entry["url"]
 
         # Check negative cache
-        if hex_code in self._negative_cache:
-            if time.time() - self._negative_cache[hex_code] < 3600:  # 1h
-                return None
+        if hex_code in self._negative_cache and time.time() - self._negative_cache[hex_code] < 3600:  # 1h
+            return None
 
         # Try registration first if available
         if registration:

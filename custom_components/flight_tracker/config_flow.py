@@ -4,28 +4,26 @@ from __future__ import annotations
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.const import CONF_LATITUDE, CONF_LONGITUDE
-from homeassistant.helpers import selector
 from homeassistant.data_entry_flow import FlowResult
+from homeassistant.helpers import selector
 
 from .const import (
-    DOMAIN,
+    API_SOURCES,
+    CONF_API_SOURCES,
+    CONF_FILTER_EMERGENCY,
+    CONF_FILTER_MILITARY,
+    CONF_MAX_ALTITUDE,
+    CONF_MIN_ALTITUDE,
+    CONF_PLANESPOTTERS_EMAIL,
     CONF_RADIUS_KM,
     CONF_SCAN_INTERVAL,
-    CONF_API_SOURCES,
-    CONF_PLANESPOTTERS_EMAIL,
-    CONF_MIN_ALTITUDE,
-    CONF_MAX_ALTITUDE,
-    CONF_FILTER_MILITARY,
-    CONF_FILTER_EMERGENCY,
     CONF_SHOW_ON_MAP,
+    DEFAULT_API_SOURCES,
+    DEFAULT_MAX_ALTITUDE,
+    DEFAULT_MIN_ALTITUDE,
     DEFAULT_RADIUS_KM,
     DEFAULT_SCAN_INTERVAL,
-    DEFAULT_MIN_ALTITUDE,
-    DEFAULT_MAX_ALTITUDE,
-    DEFAULT_API_SOURCES,
-    API_SOURCES,
-    API_SOURCE_ADSB_FI,
-    API_SOURCE_ADSB_LOL,
+    DOMAIN,
 )
 
 

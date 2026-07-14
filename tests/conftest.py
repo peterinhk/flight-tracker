@@ -6,7 +6,6 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "custom_components"))
 
 import pytest
-import pytest_asyncio
 
 
 @pytest.fixture(scope="session")
@@ -33,6 +32,7 @@ def mock_hass():
 def mock_config_entry():
     """Mock config entry."""
     from unittest.mock import MagicMock
+
     from homeassistant.config_entries import ConfigEntry
     entry = MagicMock(spec=ConfigEntry)
     entry.data = {

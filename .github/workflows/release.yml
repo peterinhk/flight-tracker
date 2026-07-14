@@ -21,27 +21,38 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install Hatch
-        run: pip install hatch
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install hatch
 
       - name: Build package
         run: hatch build
 
+      - name: Create HACS zip
+        run: |
+          mkdir -p dist/hacs
+          cd custom_components
+          zip -r ../dist/hacs/flight_tracker-${GITHUB_REF_NAME#v}.zip flight_tracker/
+          cd ..
+
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          files: dist/*
+          files: |
+            dist/*
+            dist/hacs/*
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Validate HACS
+      - name: Validate HACS version
         run: |
           python -c "
           import json
+          import re
           with open('hacs.json') as f:
               hacs = json.load(f)
-          import re
           version = re.search(r'v(.+)', '${{ github.ref_name }}').group(1)
           assert hacs['version'] == version, f'Version mismatch: hacs.json={hacs[\"version\"]} tag={version}'
           print(f'Version {version} matches hacs.json')
