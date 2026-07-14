@@ -5,8 +5,9 @@ from pathlib import Path
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from unittest.mock import AsyncMock
+
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
 
 from custom_components.flight_tracker.api import ADSBFiClient, ADSBLolClient, PlanespottersClient
 
@@ -128,6 +129,7 @@ class TestPlanespottersClient:
     async def test_get_image_url_expired_cache(self, client):
         """Test expired cache triggers fetch."""
         import time
+
         client._cache["a1b2c3"] = {
             "url": "http://example.com/img.jpg",
             "timestamp": time.time() - 100000,  # Expired
