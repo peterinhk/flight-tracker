@@ -27,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
-## [1.0.1] - 2026-07-16
+## [1.0.2] - 2026-07-16
 
 ### Fixed
 - Fixed circular import between coordinator.py and entity_manager.py by extracting shared data models to models.py
