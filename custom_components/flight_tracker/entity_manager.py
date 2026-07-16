@@ -8,7 +8,6 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import ENTITY_STALE_THRESHOLD_SECONDS
-from .coordinator import FlightTrackerCoordinator
 from .device_tracker import FlightDeviceTracker
 
 _LOGGER = logging.getLogger(__name__)
