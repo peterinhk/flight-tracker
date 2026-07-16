@@ -19,7 +19,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .coordinator import FlightTrackerCoordinator
+from .models import FlightTrackerCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 

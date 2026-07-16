@@ -10,6 +10,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import ENTITY_STALE_THRESHOLD_SECONDS
 from .device_tracker import FlightDeviceTracker
+from .models import FlightTrackerCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -20,7 +21,7 @@ class FlightTrackerEntityManager:
     def __init__(
         self,
         hass: HomeAssistant,
-        coordinator: Any,
+        coordinator: FlightTrackerCoordinator,
         async_add_entities: AddEntitiesCallback,
     ) -> None:
         """Initialize the entity manager."""
