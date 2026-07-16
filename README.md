@@ -20,14 +20,14 @@ Track live flights from **ADSB.fi**, **ADSB.lol**, **ADSB.com** with **Planespot
 ### HACS (Recommended)
 
 1. Open HACS → Integrations → ⋮ → Custom repositories
-2. Add `https://github.com/peterjurgens/flight-tracker` (Category: Integration)
+2. Add `https://github.com/peterinhk/flight-tracker` (Category: Integration)
 3. Search for "Flight Tracker" and install
 4. Restart Home Assistant
 5. Go to Settings → Devices & Services → Add Integration → Flight Tracker
 
 ### Manual
 
-1. Download latest `flight_tracker-<version>.zip` from [Releases](https://github.com/peterjurgens/flight-tracker/releases)
+1. Download latest `flight_tracker-<version>.zip` from [Releases](https://github.com/peterinhk/flight-tracker/releases)
 2. Extract to `<config>/custom_components/flight_tracker/`
 3. Restart Home Assistant
 4. Add integration via Settings → Devices & Services
@@ -102,7 +102,7 @@ default_zoom: 8
 
 ```bash
 # Clone and setup
-git clone https://github.com/peterjurgens/flight-tracker
+git clone https://github.com/peterinhk/flight-tracker
 cd flight-tracker
 pip install -e .[dev]
 
@@ -113,6 +113,7 @@ pytest
 ruff check .
 ruff format --check .
 mypy custom_components/flight_tracker
+```
 ```
 
 ## Contributing

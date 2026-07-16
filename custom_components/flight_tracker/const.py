@@ -10,7 +10,6 @@ VERSION = "1.0.0"
 PLATFORMS: list[Platform] = [
     Platform.DEVICE_TRACKER,
     Platform.SENSOR,
-    Platform.BINARY_SENSOR,
 ]
 
 # Configuration keys
@@ -19,13 +18,17 @@ CONF_LONGITUDE = "longitude"
 CONF_RADIUS_KM = "radius_km"
 CONF_SCAN_INTERVAL = "scan_interval"
 CONF_ENABLE_WEBSOCKET = "enable_websocket"
+CONF_API_SOURCES = "api_sources"
 CONF_APIS_ENABLED = "apis_enabled"
 CONF_PLANESPOTTERS_EMAIL = "planespotters_email"
 CONF_MIN_ALTITUDE = "min_altitude"
 CONF_MAX_ALTITUDE = "max_altitude"
 CONF_TRACK_MILITARY = "track_military"
+CONF_FILTER_MILITARY = "filter_military"
+CONF_FILTER_EMERGENCY = "filter_emergency"
 CONF_TRACK_GA = "track_ga"
 CONF_MAX_ENTITIES = "max_entities"
+CONF_SHOW_ON_MAP = "show_on_map"
 
 # Defaults
 DEFAULT_RADIUS_KM = 50
@@ -34,8 +37,19 @@ DEFAULT_ENABLE_WEBSOCKET = True
 DEFAULT_MIN_ALTITUDE = 0  # feet
 DEFAULT_MAX_ALTITUDE = 60000  # feet
 DEFAULT_TRACK_MILITARY = False
+DEFAULT_FILTER_MILITARY = False
+DEFAULT_FILTER_EMERGENCY = False
 DEFAULT_TRACK_GA = True
 DEFAULT_MAX_ENTITIES = 100
+DEFAULT_SHOW_ON_MAP = True
+
+# API sources
+API_SOURCES = {
+    "adsb_fi": "ADSB.fi",
+    "adsb_lol": "ADSB.lol",
+    "adsb_com": "ADSB.com",
+}
+DEFAULT_API_SOURCES = ["adsb_fi", "adsb_lol"]
 
 # API endpoints
 ADSB_FI_REST = "https://api.adsb.fi/v2"
@@ -130,6 +144,9 @@ SENSOR_FLIGHTS_NEAREST = "flight_nearest"
 SENSOR_FLIGHTS_HIGHEST = "flight_highest"
 SENSOR_FLIGHTS_FASTEST = "flight_fastest"
 SENSOR_IMAGES_CACHED = "images_cached"
+
+# Device Tracker
+DEVICE_TRACKER_ICON = "mdi:airplane"
 
 # Services
 SERVICE_REFRESH = "refresh"

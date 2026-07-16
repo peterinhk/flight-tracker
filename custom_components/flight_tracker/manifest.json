@@ -2,12 +2,12 @@
   "domain": "flight_tracker",
   "name": "Flight Tracker",
   "version": "1.0.0",
-  "documentation": "https://github.com/peterjurgens/flight-tracker/blob/main/README.md",
+  "documentation": "https://github.com/peterinhk/flight-tracker/blob/main/README.md",
   "requirements": [
     "aiohttp>=3.9",
     "aiofiles>=23.0"
   ],
-  "codeowners": ["@peterjurgens"],
+  "codeowners": ["@peterinhk"],
   "config_flow": true,
   "dependencies": [],
   "iot_class": "cloud_polling",

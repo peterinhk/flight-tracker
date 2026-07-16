@@ -9,8 +9,8 @@
   "hass_dependencies": ["device_tracker", "sensor", "websocket_api"],
   "translations": ["en"],
   "config_flow": true,
-  "documentation": "https://github.com/peterjurgens/flight-tracker/blob/main/README.md",
-  "issue_tracker": "https://github.com/peterjurgens/flight-tracker/issues",
+  "documentation": "https://github.com/peterinhk/flight-tracker/blob/main/README.md",
+  "issue_tracker": "https://github.com/peterinhk/flight-tracker/issues",
   "home_assistant_services": [
     {
       "name": "refresh",
