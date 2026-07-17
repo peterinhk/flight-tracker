@@ -111,6 +111,7 @@ class TestPlanespottersClient:
 
         # Add entry with current timestamp
         import time
+
         client._cache["a1b2c3"] = {"url": "http://example.com/img.jpg", "timestamp": time.time()}
         await client._save_cache()
 
@@ -123,6 +124,7 @@ class TestPlanespottersClient:
     async def test_get_image_url_cached(self, client):
         """Test getting cached image URL."""
         import time
+
         client._cache["a1b2c3"] = {
             "url": "http://example.com/img.jpg",
             "timestamp": time.time(),  # Current time - valid cache
