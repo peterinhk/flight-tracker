@@ -7,27 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-- Initial release of Flight Tracker integration
-- Support for ADSB.fi REST API and WebSocket
-- Support for ADSB.lol REST API and WebSocket
-- Planespotters integration for aircraft images
-- Device tracker entities for live map display
-- Sensor entities for flight statistics
-- Full config flow with options
-- HACS support
-- Multi-API data aggregation with deduplication
-- Configurable radius, altitude filters, scan interval
-- WebSocket live updates with auto-reconnect
-- Image caching with 24-hour TTL
-
-### Changed
-- N/A
-
 ### Fixed
-- N/A
+- Config flow: aligned schema keys with const.py constants (CONF_TRACK_MILITARY, CONF_TRACK_GA) and translation keys
+- Added missing CONF_TRACK_GA field to config flow schema with proper default
 
-## [1.0.5] - 2026-07-17
+## [1.0.6] - 2026-07-17
 
 ### Fixed
 - All mypy type checking passes (no issues found in 13 source files)

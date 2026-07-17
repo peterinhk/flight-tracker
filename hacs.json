@@ -3,7 +3,7 @@
   "content_in_root": false,
   "filename": "custom_components/flight_tracker",
   "domains": ["flight_tracker"],
-  "version": "1.0.5",
+  "version": "1.0.6",
   "minimum_ha_version": "2024.1.0",
   "requirements": ["aiohttp>=3.9.0", "aiofiles>=23.0.0"],
   "hass_dependencies": ["device_tracker", "sensor", "websocket_api"],

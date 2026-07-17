@@ -12,18 +12,21 @@ from .const import (
     API_SOURCES,
     CONF_APIS_ENABLED,
     CONF_FILTER_EMERGENCY,
-    CONF_FILTER_MILITARY,
     CONF_MAX_ALTITUDE,
     CONF_MIN_ALTITUDE,
     CONF_PLANESPOTTERS_EMAIL,
     CONF_RADIUS_KM,
     CONF_SCAN_INTERVAL,
     CONF_SHOW_ON_MAP,
+    CONF_TRACK_GA,
+    CONF_TRACK_MILITARY,
     DEFAULT_APIS_ENABLED,
     DEFAULT_MAX_ALTITUDE,
     DEFAULT_MIN_ALTITUDE,
     DEFAULT_RADIUS_KM,
     DEFAULT_SCAN_INTERVAL,
+    DEFAULT_TRACK_GA,
+    DEFAULT_TRACK_MILITARY,
     DOMAIN,
 )
 
@@ -126,8 +129,9 @@ class FlightTrackerConfigFlow(config_entries.ConfigFlow):
                         unit_of_measurement="ft",
                     )
                 ),
-                vol.Optional(CONF_FILTER_MILITARY, default=False): selector.BooleanSelector(),
+                vol.Optional(CONF_TRACK_MILITARY, default=DEFAULT_TRACK_MILITARY): selector.BooleanSelector(),
                 vol.Optional(CONF_FILTER_EMERGENCY, default=False): selector.BooleanSelector(),
+                vol.Optional(CONF_TRACK_GA, default=DEFAULT_TRACK_GA): selector.BooleanSelector(),
                 vol.Optional(CONF_SHOW_ON_MAP, default=True): selector.BooleanSelector(),
             }
         )

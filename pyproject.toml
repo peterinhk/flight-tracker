@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "flight-tracker"
-version = "1.0.5"
+version = "1.0.6"
 description = "Home Assistant custom integration for live flight tracking with ADSB.fi, ADSB.lol, ADSB.com and Planespotters"
 readme = "README.md"
 license = {text = "MIT"}
