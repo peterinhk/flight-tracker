@@ -128,8 +128,15 @@ class BaseAPIClient:
 class ADSBFiClient(BaseAPIClient):
     """Client for ADSB.fi API."""
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+    def __init__(
+        self,
+        session: aiohttp.ClientSession,
+        latitude: float,
+        longitude: float,
+        radius_km: int,
+        user_agent: str,
+    ) -> None:
+        super().__init__(session, latitude, longitude, radius_km, user_agent)
         self._ws_url = f"wss://api.adsb.fi/v2/ws/lat/{self._latitude}/lon/{self._longitude}/dist/{self._radius_km}"
 
     async def fetch_rest(self) -> list[FlightData]:
@@ -199,8 +206,15 @@ class ADSBFiClient(BaseAPIClient):
 class ADSBLolClient(BaseAPIClient):
     """Client for ADSB.lol API."""
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+    def __init__(
+        self,
+        session: aiohttp.ClientSession,
+        latitude: float,
+        longitude: float,
+        radius_km: int,
+        user_agent: str,
+    ) -> None:
+        super().__init__(session, latitude, longitude, radius_km, user_agent)
         self._ws_url = f"wss://api.adsb.lol/v2/ws/lat/{self._latitude}/lon/{self._longitude}/dist/{self._radius_km}"
 
     async def fetch_rest(self) -> list[FlightData]:
@@ -281,7 +295,7 @@ class PlanespottersClient:
         self._email = email
         self._cache_dir = cache_dir
         self._cache_file = cache_dir / "images.json"
-        self._cache: dict[str, dict] = {}
+        self._cache: dict[str, dict[str, Any]] = {}
         self._negative_cache: dict[str, float] = {}  # hex -> timestamp
         self._load_cache()
 
@@ -309,7 +323,7 @@ class PlanespottersClient:
         except Exception as err:
             _LOGGER.warning("Failed to save image cache: %s", err)
 
-    def get_stats(self) -> dict:
+    def get_stats(self) -> dict[str, int]:
         """Get cache statistics."""
         time.time()
         entries_with_images = sum(1 for v in self._cache.values() if v.get("url"))
@@ -326,8 +340,9 @@ class PlanespottersClient:
         # Check positive cache
         if hex_code in self._cache:
             entry = self._cache[hex_code]
-            if entry.get("url") and time.time() - entry.get("timestamp", 0) < 86400:  # 24h
-                return entry["url"]
+            url = entry.get("url")
+            if url and time.time() - entry.get("timestamp", 0) < 86400:  # 24h
+                return str(url)
 
         # Check negative cache
         if hex_code in self._negative_cache and time.time() - self._negative_cache[hex_code] < 3600:  # 1h
@@ -354,7 +369,7 @@ class PlanespottersClient:
 
     async def _fetch_by_hex(self, hex_code: str) -> str | None:
         """Fetch image by hex code."""
-        url = f"https://api.planespotters.net/pub/photos/hex/{hex_code}"
+        url = f"https://api.planespotters.net/pub/photos/hex/{hex_code.upper()}"
         headers = {"User-Agent": f"FlightTracker/1.0 ({self._email})"}
 
         try:
@@ -365,7 +380,7 @@ class PlanespottersClient:
                     if photos:
                         # Get highest resolution photo
                         best = max(photos, key=lambda p: p.get("thumbnail_width", 0) * p.get("thumbnail_height", 0))
-                        return best.get("thumbnail_large") or best.get("thumbnail") or best.get("image_url")
+                        return best.get("thumbnail_large") or best.get("thumbnail") or best.get("image_url") or ""
                 elif resp.status == 404:
                     return None
         except Exception as err:
@@ -384,7 +399,7 @@ class PlanespottersClient:
                     photos = data.get("photos", [])
                     if photos:
                         best = max(photos, key=lambda p: p.get("thumbnail_width", 0) * p.get("thumbnail_height", 0))
-                        return best.get("thumbnail_large") or best.get("thumbnail") or best.get("image_url")
+                        return best.get("thumbnail_large") or best.get("thumbnail") or best.get("image_url") or ""
                 elif resp.status == 404:
                     return None
         except Exception as err:
@@ -414,6 +429,6 @@ class ADSBComClient(BaseAPIClient):
         _LOGGER.debug("ADSB.com client not yet implemented")
         return []
 
-    async def start_websocket(self, callback: Callable) -> None:
+    async def start_websocket(self, callback: Callable[[list[FlightData]], None]) -> None:
         """Start WebSocket connection."""
         _LOGGER.debug("ADSB.com WebSocket not yet implemented")

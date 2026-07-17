@@ -236,7 +236,7 @@ class ImagesCachedSensor(FlightTrackerBaseSensor):
         """Return number of cached images."""
         if self.coordinator.planespotters:
             stats = self.coordinator.planespotters.get_stats()
-            return stats.get("entries_with_images", 0)
+            return int(stats.get("entries_with_images", 0))
         return 0
 
     @property

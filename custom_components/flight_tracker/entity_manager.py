@@ -12,7 +12,7 @@ from .const import ENTITY_STALE_THRESHOLD_SECONDS
 from .device_tracker import FlightDeviceTracker
 
 if TYPE_CHECKING:
-    from .models import FlightTrackerCoordinator
+    from .coordinator import FlightTrackerCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 

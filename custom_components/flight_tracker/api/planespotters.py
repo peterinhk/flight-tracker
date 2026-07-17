@@ -71,7 +71,7 @@ class PlanespottersClient:
     def _is_cached_valid(self, entry: dict[str, Any], max_age_hours: int = 24) -> bool:
         """Check if cache entry is still valid."""
         fetched = entry.get("fetched", 0)
-        return (time.time() - fetched) < (max_age_hours * 3600)
+        return bool((time.time() - fetched) < (max_age_hours * 3600))
 
     async def get_image_url(self, hex_code: str, registration: str | None = None) -> str | None:
         """Get image URL for aircraft by hex code or registration."""
@@ -135,7 +135,7 @@ class PlanespottersClient:
                     if photos:
                         # Get the first (usually highest quality) photo
                         photo = photos[0]
-                        return photo.get("thumbnail_large") or photo.get("thumbnail") or photo.get("image_url")
+                        return photo.get("thumbnail_large") or photo.get("thumbnail") or photo.get("image_url") or ""
                 elif resp.status == 404:
                     _LOGGER.debug("No images found for %s", url)
                 else:

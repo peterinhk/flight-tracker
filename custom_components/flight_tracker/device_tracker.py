@@ -60,9 +60,6 @@ async def async_setup_entry(
     entity_manager = FlightTrackerEntityManager(hass, coordinator, async_add_entities)
     coordinator._entity_manager = entity_manager
 
-    # Initial entity creation
-    await entity_manager.update_entities()
-
 
 class FlightDeviceTracker(CoordinatorEntity[FlightTrackerCoordinator], TrackerEntity):
     """Device tracker for a flight."""
@@ -86,7 +83,8 @@ class FlightDeviceTracker(CoordinatorEntity[FlightTrackerCoordinator], TrackerEn
     @property
     def flight(self) -> Flight | None:
         """Get flight data from coordinator."""
-        return self.coordinator.data.flights.get(self._flight_hex)
+        flights: dict[str, Flight] = self.coordinator.data.flights
+        return flights.get(self._flight_hex)
 
     @property
     def latitude(self) -> float | None:

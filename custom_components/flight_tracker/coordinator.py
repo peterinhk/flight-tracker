@@ -78,7 +78,7 @@ class FlightTrackerCoordinator(DataUpdateCoordinator[CoordinatorData]):
         self._adsb_lol: ADSBLolClient | None = None
         self._adsb_com: ADSBComClient | None = None
         self.planespotters: PlanespottersClient | None = None
-        self._entity_manager = None
+        self._entity_manager: FlightTrackerEntityManager | None = None
         self._shutdown = False
 
         super().__init__(
