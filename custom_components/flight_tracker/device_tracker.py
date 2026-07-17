@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from homeassistant.components.device_tracker import (  # type: ignore[import-untyped]
     SourceType,
@@ -39,8 +39,11 @@ from .const import (
     DEVICE_TRACKER_ICON,
     DOMAIN,
 )
-from .models import Flight, FlightTrackerCoordinator
 from .entity_manager import FlightTrackerEntityManager
+from .models import Flight
+
+if TYPE_CHECKING:
+    from .coordinator import FlightTrackerCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 

@@ -105,7 +105,9 @@ async def async_setup_services(hass: HomeAssistant) -> None:
                 else:
                     # Try to fetch
                     if coordinator.planespotters is not None:
-                        image_url = await coordinator.planespotters.get_image_url(flight.icao24, flight.registration or "")
+                        image_url = await coordinator.planespotters.get_image_url(
+                            flight.icao24 or flight.hex, flight.registration or ""
+                        )
                         if image_url:
                             flight.image_url = image_url
                             return {

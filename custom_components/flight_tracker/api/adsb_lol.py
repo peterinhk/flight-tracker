@@ -6,15 +6,15 @@ import asyncio
 import contextlib
 import json
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Callable
+from typing import Any
 
 import aiohttp
 
 from ..const import (
     ADSB_LOL_REST,
     ADSB_LOL_WS,
-    WS_UPDATE_INTERVAL,
 )
 
 _LOGGER = logging.getLogger(__name__)

@@ -6,6 +6,7 @@ import asyncio
 import contextlib
 import json
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
 

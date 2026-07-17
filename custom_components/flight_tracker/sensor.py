@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from .coordinator import FlightTrackerCoordinator
 
 from homeassistant.components.sensor import (  # type: ignore[import-untyped]
     SensorDeviceClass,
@@ -19,7 +22,7 @@ from homeassistant.core import HomeAssistant  # type: ignore[import-untyped]
 from homeassistant.helpers.entity_platform import AddEntitiesCallback  # type: ignore[import-untyped]
 from homeassistant.helpers.update_coordinator import CoordinatorEntity  # type: ignore[import-untyped]
 
-from .models import FlightTrackerCoordinator
+from .models import Flight
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -242,7 +245,8 @@ class ImagesCachedSensor(FlightTrackerBaseSensor):
     def extra_state_attributes(self) -> dict[str, Any] | None:
         """Return cache statistics."""
         if self.coordinator.planespotters:
-            return self.coordinator.planespotters.get_stats()
+            stats = self.coordinator.planespotters.get_stats()
+            return dict(stats) if stats else {"total_entries": 0, "entries_with_images": 0, "negative_entries": 0}
         return {"total_entries": 0, "entries_with_images": 0, "negative_entries": 0}
 
 
@@ -265,7 +269,8 @@ class CategoryBreakdownSensor(FlightTrackerBaseSensor):
     def extra_state_attributes(self) -> dict[str, Any] | None:
         """Return category breakdown."""
         stats = self.coordinator.data.stats
-        return stats.get("by_category", {})
+        by_cat = stats.get("by_category", {})
+        return dict(by_cat) if by_cat else {}
 
 
 class SourceBreakdownSensor(FlightTrackerBaseSensor):
@@ -287,4 +292,5 @@ class SourceBreakdownSensor(FlightTrackerBaseSensor):
     def extra_state_attributes(self) -> dict[str, Any] | None:
         """Return source breakdown."""
         stats = self.coordinator.data.stats
-        return stats.get("by_source", {})
+        by_src = stats.get("by_source", {})
+        return dict(by_src) if by_src else {}

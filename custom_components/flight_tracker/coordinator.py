@@ -6,7 +6,7 @@ import asyncio
 import logging
 import math
 import time
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from homeassistant.config_entries import ConfigEntry  # type: ignore[import-untyped]
 from homeassistant.core import HomeAssistant  # type: ignore[import-untyped]
@@ -38,6 +38,9 @@ from .const import (
     DOMAIN,
 )
 from .models import CoordinatorData, Flight
+
+if TYPE_CHECKING:
+    from .entity_manager import FlightTrackerEntityManager
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -333,8 +336,8 @@ class FlightTrackerCoordinator(DataUpdateCoordinator[CoordinatorData]):
     def _update_stats(self) -> None:
         """Update statistics."""
         flights = self.data.flights
-        categories = {}
-        by_source = {}
+        categories: dict[str, int] = {}
+        by_source: dict[str, int] = {}
 
         for flight in flights.values():
             cat = flight.category_label or "Unknown"
@@ -372,7 +375,7 @@ class FlightTrackerCoordinator(DataUpdateCoordinator[CoordinatorData]):
         # Trigger entity updates
         self.async_set_updated_data(self.data)
 
-    def set_entity_manager(self, manager) -> None:
+    def set_entity_manager(self, manager: FlightTrackerEntityManager) -> None:
         """Set entity manager for cleanup."""
         self._entity_manager = manager
 
