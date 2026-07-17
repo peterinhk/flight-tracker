@@ -109,8 +109,9 @@ class TestPlanespottersClient:
         # Cache should be empty initially
         assert len(client._cache) == 0
 
-        # Add entry
-        client._cache["a1b2c3"] = {"url": "http://example.com/img.jpg", "timestamp": 1234567890}
+        # Add entry with current timestamp
+        import time
+        client._cache["a1b2c3"] = {"url": "http://example.com/img.jpg", "timestamp": time.time()}
         await client._save_cache()
 
         # Create new client with same cache dir
@@ -121,9 +122,10 @@ class TestPlanespottersClient:
     @pytest.mark.asyncio
     async def test_get_image_url_cached(self, client):
         """Test getting cached image URL."""
+        import time
         client._cache["a1b2c3"] = {
             "url": "http://example.com/img.jpg",
-            "timestamp": 1234567890,
+            "timestamp": time.time(),  # Current time - valid cache
         }
         url = await client.get_image_url("a1b2c3")
         assert url == "http://example.com/img.jpg"
