@@ -7,13 +7,14 @@ import contextlib
 import json
 import logging
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Callable
 
 import aiohttp
 
 from ..const import (
     ADSB_LOL_REST,
     ADSB_LOL_WS,
+    WS_UPDATE_INTERVAL,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -60,7 +61,7 @@ class ADSBLolClient:
         self._radius_km = radius_km
         self._user_agent = user_agent
         self._ws_task: asyncio.Task | None = None
-        self._ws_callback: callable | None = None
+        self._ws_callback: Callable | None = None
         self._ws_connected = False
         self._reconnect_delay = 1
 
@@ -119,7 +120,7 @@ class ADSBLolClient:
                 _LOGGER.debug("Failed to parse flight: %s", err)
         return flights
 
-    async def start_websocket(self, callback: callable) -> None:
+    async def start_websocket(self, callback: Callable) -> None:
         """Start WebSocket connection for live updates."""
         self._ws_callback = callback
         if self._ws_task is None or self._ws_task.done():

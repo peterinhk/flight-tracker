@@ -65,7 +65,7 @@ class ADSBFiClient:
         self._radius_km = radius_km
         self._user_agent = user_agent
         self._ws_task: asyncio.Task | None = None
-        self._ws_callback: callable | None = None
+        self._ws_callback: Callable | None = None
         self._ws_connected = False
         self._reconnect_delay = 1
 
@@ -128,7 +128,7 @@ class ADSBFiClient:
                 _LOGGER.debug("Failed to parse flight: %s", err)
         return flights
 
-    async def start_websocket(self, callback: callable) -> None:
+    async def start_websocket(self, callback: Callable) -> None:
         """Start WebSocket connection for live updates."""
         self._ws_callback = callback
         if self._ws_task is None or self._ws_task.done():

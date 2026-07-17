@@ -1,7 +1,7 @@
 {
   "domain": "flight_tracker",
   "name": "Flight Tracker",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "documentation": "https://github.com/peterjurgens/flight-tracker/blob/main/README.md",
   "requirements": [
     "aiohttp>=3.9",

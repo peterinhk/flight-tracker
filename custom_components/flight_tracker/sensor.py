@@ -5,19 +5,19 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from homeassistant.components.sensor import (
+from homeassistant.components.sensor import (  # type: ignore[import-untyped]
     SensorDeviceClass,
     SensorEntity,
     SensorStateClass,
 )
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import (
+from homeassistant.config_entries import ConfigEntry  # type: ignore[import-untyped]
+from homeassistant.const import (  # type: ignore[import-untyped]
     UnitOfLength,
     UnitOfSpeed,
 )
-from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from homeassistant.core import HomeAssistant  # type: ignore[import-untyped]
+from homeassistant.helpers.entity_platform import AddEntitiesCallback  # type: ignore[import-untyped]
+from homeassistant.helpers.update_coordinator import CoordinatorEntity  # type: ignore[import-untyped]
 
 from .models import FlightTrackerCoordinator
 

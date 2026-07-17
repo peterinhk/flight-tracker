@@ -5,15 +5,15 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from homeassistant.components.device_tracker import (
+from homeassistant.components.device_tracker import (  # type: ignore[import-untyped]
     SourceType,
     TrackerEntity,
 )
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.entity import DeviceInfo
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from homeassistant.config_entries import ConfigEntry  # type: ignore[import-untyped]
+from homeassistant.core import HomeAssistant, callback  # type: ignore[import-untyped]
+from homeassistant.helpers.entity import DeviceInfo  # type: ignore[import-untyped]
+from homeassistant.helpers.entity_platform import AddEntitiesCallback  # type: ignore[import-untyped]
+from homeassistant.helpers.update_coordinator import CoordinatorEntity  # type: ignore[import-untyped]
 
 from .const import (
     ATTR_AIRCRAFT_TYPE,
@@ -39,8 +39,8 @@ from .const import (
     DEVICE_TRACKER_ICON,
     DOMAIN,
 )
-from .entity_manager import FlightTrackerEntityManager
 from .models import Flight, FlightTrackerCoordinator
+from .entity_manager import FlightTrackerEntityManager
 
 _LOGGER = logging.getLogger(__name__)
 

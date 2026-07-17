@@ -9,7 +9,7 @@ import logging
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 import aiofiles
 import aiohttp
@@ -62,7 +62,7 @@ class BaseAPIClient:
         self._radius_km = radius_km
         self._user_agent = user_agent
         self._ws_task: asyncio.Task | None = None
-        self._ws_callback: callable | None = None
+        self._ws_callback: Callable | None = None
         self._ws_connected = False
         self._ws_reconnect_delay = 1
         self._shutdown = False
@@ -76,7 +76,7 @@ class BaseAPIClient:
         """Fetch flights via REST API. Must be implemented by subclass."""
         raise NotImplementedError
 
-    async def start_websocket(self, callback: callable) -> None:
+    async def start_websocket(self, callback: Callable) -> None:
         """Start WebSocket connection. Must be implemented by subclass."""
         self._ws_callback = callback
         raise NotImplementedError
@@ -151,7 +151,7 @@ class ADSBFiClient(BaseAPIClient):
             _LOGGER.error("ADSB.fi REST error: %s", err)
             return []
 
-    async def start_websocket(self, callback: callable) -> None:
+    async def start_websocket(self, callback: Callable) -> None:
         """Start WebSocket connection."""
         self._ws_callback = callback
         if self._ws_task is None or self._ws_task.done():
@@ -222,7 +222,7 @@ class ADSBLolClient(BaseAPIClient):
             _LOGGER.error("ADSB.lol REST error: %s", err)
             return []
 
-    async def start_websocket(self, callback: callable) -> None:
+    async def start_websocket(self, callback: Callable) -> None:
         """Start WebSocket connection."""
         self._ws_callback = callback
         if self._ws_task is None or self._ws_task.done():
@@ -413,6 +413,6 @@ class ADSBComClient(BaseAPIClient):
         _LOGGER.debug("ADSB.com client not yet implemented")
         return []
 
-    async def start_websocket(self, callback: callable) -> None:
+    async def start_websocket(self, callback: Callable) -> None:
         """Start WebSocket connection."""
         _LOGGER.debug("ADSB.com WebSocket not yet implemented")

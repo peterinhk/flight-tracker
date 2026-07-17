@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-import voluptuous as vol
-from homeassistant import config_entries
-from homeassistant.const import CONF_LATITUDE, CONF_LONGITUDE
-from homeassistant.data_entry_flow import FlowResult
-from homeassistant.helpers import selector
+import voluptuous as vol  # type: ignore[import-untyped]
+from homeassistant import config_entries  # type: ignore[import-untyped]
+from homeassistant.const import CONF_LATITUDE, CONF_LONGITUDE  # type: ignore[import-untyped]
+from homeassistant.data_entry_flow import FlowResult  # type: ignore[import-untyped]
+from homeassistant.helpers import selector  # type: ignore[import-untyped]
 
 from .const import (
     API_SOURCES,
@@ -28,11 +28,12 @@ from .const import (
 )
 
 
-class FlightTrackerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+class FlightTrackerConfigFlow(config_entries.ConfigFlow):
     """Handle a config flow for Flight Tracker."""
 
     VERSION = 1
     MINOR_VERSION = 1
+    domain = DOMAIN
 
     async def async_step_user(self, user_input: dict | None = None) -> FlowResult:
         """Handle the initial step."""

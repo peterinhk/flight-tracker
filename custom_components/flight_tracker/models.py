@@ -4,8 +4,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Any
+from typing import TYPE_CHECKING
 
-from .const import CATEGORY_LABELS
+if TYPE_CHECKING:
+    from .coordinator import FlightTrackerCoordinator
+
+from .const import CATEGORY_LABELS  # type: ignore[import-untyped]
 
 
 @dataclass
@@ -37,7 +41,7 @@ class Flight:
     rssi: float | None = None
     distance_km: float | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Set defaults."""
         if self.icao24 is None:
             self.icao24 = self.hex

@@ -1,13 +1,11 @@
-"""Services for Flight Tracker integration."""
-
 from __future__ import annotations
 
 import logging
 from typing import Any
 
-import voluptuous as vol
-from homeassistant.core import HomeAssistant, ServiceCall, SupportsResponse
-from homeassistant.helpers import config_validation as cv
+import voluptuous as vol  # type: ignore[import-untyped]
+from homeassistant.core import HomeAssistant, ServiceCall, SupportsResponse  # type: ignore[import-untyped]
+from homeassistant.helpers import config_validation as cv  # type: ignore[import-untyped]
 
 from .const import (
     ATTR_CALLSIGN,
@@ -18,7 +16,7 @@ from .const import (
     SERVICE_GET_FLIGHT_IMAGE,
     SERVICE_REFRESH,
 )
-from .coordinator import FlightTrackerCoordinator
+from .models import FlightTrackerCoordinator  # type: ignore[attr-defined]
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -106,16 +104,17 @@ async def async_setup_services(hass: HomeAssistant) -> None:
                     }
                 else:
                     # Try to fetch
-                    image_url = await coordinator.planespotters.get_image_url(flight.icao24, flight.registration)
-                    if image_url:
-                        flight.image_url = image_url
-                        return {
-                            "success": True,
-                            "image_url": image_url,
-                            "callsign": flight.callsign,
-                            "registration": flight.registration,
-                            "icao24": flight.icao24,
-                        }
+                    if coordinator.planespotters is not None:
+                        image_url = await coordinator.planespotters.get_image_url(flight.icao24, flight.registration or "")
+                        if image_url:
+                            flight.image_url = image_url
+                            return {
+                                "success": True,
+                                "image_url": image_url,
+                                "callsign": flight.callsign,
+                                "registration": flight.registration,
+                                "icao24": flight.icao24,
+                            }
                     return {"success": False, "error": "No image available"}
 
         return {"success": False, "error": "Flight not found"}

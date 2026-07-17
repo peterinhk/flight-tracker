@@ -8,10 +8,10 @@ import math
 import time
 from typing import Any
 
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+from homeassistant.config_entries import ConfigEntry  # type: ignore[import-untyped]
+from homeassistant.core import HomeAssistant  # type: ignore[import-untyped]
+from homeassistant.helpers.aiohttp_client import async_get_clientsession  # type: ignore[import-untyped]
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator  # type: ignore[import-untyped]
 
 from .api import ADSBComClient, ADSBFiClient, ADSBLolClient, PlanespottersClient
 from .const import (

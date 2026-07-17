@@ -3,13 +3,16 @@
 from __future__ import annotations
 
 import logging
+from typing import TYPE_CHECKING
 
-from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.core import HomeAssistant  # type: ignore[import-untyped]
+from homeassistant.helpers.entity_platform import AddEntitiesCallback  # type: ignore[import-untyped]
 
 from .const import ENTITY_STALE_THRESHOLD_SECONDS
 from .device_tracker import FlightDeviceTracker
-from .models import FlightTrackerCoordinator
+
+if TYPE_CHECKING:
+    from .models import FlightTrackerCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 

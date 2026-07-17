@@ -6,7 +6,7 @@ from homeassistant.const import Platform
 
 DOMAIN = "flight_tracker"
 NAME = "Flight Tracker"
-VERSION = "1.0.3"
+VERSION = "1.0.4"
 
 PLATFORMS: list[Platform] = [
     Platform.DEVICE_TRACKER,
@@ -144,6 +144,8 @@ ATTR_SOURCE_API = "source_api"
 ATTR_RSSI = "rssi"
 ATTR_DISTANCE_KM = "distance_km"
 
+DEVICE_TRACKER_ICON = "mdi:airplane"
+
 # Sensor names
 SENSOR_FLIGHTS_TOTAL = "flights_total"
 SENSOR_FLIGHTS_NEAREST = "flight_nearest"
@@ -155,6 +157,7 @@ SENSOR_IMAGES_CACHED = "images_cached"
 SERVICE_REFRESH = "refresh"
 SERVICE_CENTER_MAP = "center_map"
 SERVICE_SET_RADIUS = "set_radius"
+SERVICE_GET_FLIGHT_IMAGE = "get_flight_image"
 
 # Update intervals
 MIN_SCAN_INTERVAL = 30  # seconds

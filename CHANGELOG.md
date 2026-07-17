@@ -27,6 +27,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [1.0.4] - 2026-07-16
+
+### Fixed
+- Fixed mypy configuration: changed `tool.mypy.overrides` to array format `[[tool.mypy.overrides]]` for valid pyproject.toml
+- Updated all manifests to version 1.0.4 (hacs.json, manifest.json, pyproject.toml, const.py)
+
 ## [1.0.3] - 2026-07-16
 
 ### Fixed
