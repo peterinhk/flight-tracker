@@ -20,7 +20,7 @@ from .const import (
     CONF_RADIUS_KM,
     CONF_SCAN_INTERVAL,
     CONF_SHOW_ON_MAP,
-    DEFAULT_API_SOURCES,
+    DEFAULT_APIS_ENABLED,
     DEFAULT_MAX_ALTITUDE,
     DEFAULT_MIN_ALTITUDE,
     DEFAULT_RADIUS_KM,
@@ -52,7 +52,7 @@ class FlightTrackerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
                 return self.async_create_entry(
                     title=f"Flight Tracker ({lat:.4f}, {lon:.4f})",
-                    data={**user_input, CONF_APIS_ENABLED: user_input.get(CONF_API_SOURCES, DEFAULT_API_SOURCES)},
+                    data={**user_input, CONF_APIS_ENABLED: user_input.get(CONF_API_SOURCES, DEFAULT_APIS_ENABLED)},
                 )
 
         # Default to HA location
@@ -95,7 +95,7 @@ class FlightTrackerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         unit_of_measurement="seconds",
                     )
                 ),
-                vol.Required(CONF_APIS_ENABLED, default=DEFAULT_API_SOURCES): selector.SelectSelector(
+                vol.Required(CONF_API_SOURCES, default=DEFAULT_APIS_ENABLED): selector.SelectSelector(
                     selector.SelectSelectorConfig(
                         options=list(API_SOURCES.keys()),
                         translation_key="api_sources",
