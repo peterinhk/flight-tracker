@@ -27,6 +27,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [1.0.3] - 2026-07-16
+
+### Fixed
+- Config flow schema validation: use CONF_APIS_ENABLED key consistently across const.py and config_flow.py
+- Config flow default values: use DEFAULT_APIS_ENABLED for both schema default and entry creation
+- Updated version to 1.0.3 in all manifests (hacs.json, manifest.json, pyproject.toml, const.py)
+
 ## [1.0.2] - 2026-07-16
 
 ### Fixed
