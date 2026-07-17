@@ -22,8 +22,6 @@ from homeassistant.core import HomeAssistant  # type: ignore[import-untyped]
 from homeassistant.helpers.entity_platform import AddEntitiesCallback  # type: ignore[import-untyped]
 from homeassistant.helpers.update_coordinator import CoordinatorEntity  # type: ignore[import-untyped]
 
-from .models import Flight
-
 _LOGGER = logging.getLogger(__name__)
 
 

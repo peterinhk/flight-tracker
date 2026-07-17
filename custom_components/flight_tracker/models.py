@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from .coordinator import FlightTrackerCoordinator
+    pass
 
 from .const import CATEGORY_LABELS  # type: ignore[import-untyped]
 
