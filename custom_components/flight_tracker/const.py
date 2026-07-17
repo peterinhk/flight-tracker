@@ -6,7 +6,7 @@ from homeassistant.const import Platform
 
 DOMAIN = "flight_tracker"
 NAME = "Flight Tracker"
-VERSION = "1.0.4"
+VERSION = "1.0.5"
 
 PLATFORMS: list[Platform] = [
     Platform.DEVICE_TRACKER,

@@ -27,6 +27,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [1.0.5] - 2026-07-17
+
+### Fixed
+- All mypy type checking passes (no issues found in 13 source files)
+- Ruff linting passes with zero errors
+- PlanespottersClient cache type annotations fixed (dict[str, dict[str, Any]])
+- GitHub Actions Validate workflow runs before Release workflow
+- Release workflow only triggers on successful Validate completion for tagged pushes
+
 ## [1.0.4] - 2026-07-16
 
 ### Fixed

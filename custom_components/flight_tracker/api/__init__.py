@@ -319,7 +319,8 @@ class PlanespottersClient:
 
             self._cache_dir.mkdir(parents=True, exist_ok=True)
             content = json.dumps(self._cache)
-            await aiofiles.open(self._cache_file, "w").write(content)
+            async with aiofiles.open(self._cache_file, "w") as f:
+                await f.write(content)
         except Exception as err:
             _LOGGER.warning("Failed to save image cache: %s", err)
 
