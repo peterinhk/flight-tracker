@@ -39,7 +39,8 @@ from .const import (
     DEVICE_TRACKER_ICON,
     DOMAIN,
 )
-from .models import FlightTrackerCoordinator, Flight
+from .entity_manager import FlightTrackerEntityManager
+from .models import Flight, FlightTrackerCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
