@@ -53,13 +53,15 @@ class TestADSBFiClient:
         data = {
             "ac": [
                 {"hex": "a1b2c3", "flight": "UAL123"},  # No lat/lon
-                {"hex": "d4e5f6", "lat": 37.7749, "lon": -122.4194},  # No hex
+                {"hex": "d4e5f6", "lat": 37.7749, "lon": -122.4194},  # No flight
                 {"hex": "g7h8i9", "lat": 37.7749, "lon": -122.4194, "flight": "ABC"},  # Valid
             ]
         }
         flights = client._parse_flights(data)
-        assert len(flights) == 1
-        assert flights[0].hex == "g7h8i9"
+        # Two flights have valid hex + lat/lon (d4e5f6 and g7h8i9)
+        assert len(flights) == 2
+        assert flights[0].hex == "d4e5f6"
+        assert flights[1].hex == "g7h8i9"
 
 
 class TestADSBLolClient:
