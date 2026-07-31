@@ -31,12 +31,11 @@ from .const import (
 )
 
 
-class FlightTrackerConfigFlow(config_entries.ConfigFlow):
+class FlightTrackerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Flight Tracker."""
 
     VERSION = 1
     MINOR_VERSION = 1
-    domain = DOMAIN
 
     async def async_step_user(self, user_input: dict | None = None) -> ConfigFlowResult:
         """Handle the initial step."""
