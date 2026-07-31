@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this format.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.9] - 2026-07-31
+
+### Fixed
+- Config flow raised `voluptuous.MultipleInvalid` while building the form: the latitude/longitude `NumberSelectorConfig` used `step=0.0001`, but Home Assistant's selector schema requires `step >= 0.001`. This crashed form generation and surfaced to the frontend as the generic, unhelpful "Config flow could not be loaded: 400: Bad Request" (an uncaught internal error, unlike the JSON-formatted "Invalid handler specified" from 1.0.8). Changed both selectors to `step=0.001`.
+- `FlightTrackerCoordinator.__init__` set `self.data = CoordinatorData()` *before* calling `super().__init__()`, but `DataUpdateCoordinator.__init__` unconditionally sets `self.data = None`, silently discarding it. The first refresh then crashed with `AttributeError: 'NoneType' object has no attribute 'flights'`, permanently stuck the entry in `SETUP_RETRY`. Moved the assignment to after the `super().__init__()` call.
+
+Both bugs were only caught by standing up a real Home Assistant instance via `pytest-homeassistant-custom-component` and running the config flow and entry setup end-to-end (init → submit form → `async_setup_entry` → first coordinator refresh), rather than relying on static analysis or mocked unit tests. The entry now reaches `ConfigEntryState.LOADED` and all sensor/device_tracker entities register successfully.
+
 ## [1.0.8] - 2026-07-31
 
 ### Fixed

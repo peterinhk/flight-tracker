@@ -74,7 +74,6 @@ class FlightTrackerCoordinator(DataUpdateCoordinator[CoordinatorData]):
         self.max_entities = entry.data.get(CONF_MAX_ENTITIES, DEFAULT_MAX_ENTITIES)
 
         # State
-        self.data = CoordinatorData()
         self._adsb_fi: ADSBFiClient | None = None
         self._adsb_lol: ADSBLolClient | None = None
         self._adsb_com: ADSBComClient | None = None
@@ -88,6 +87,9 @@ class FlightTrackerCoordinator(DataUpdateCoordinator[CoordinatorData]):
             name=DOMAIN,
             update_interval=timedelta(seconds=self.scan_interval),
         )
+
+        # DataUpdateCoordinator.__init__ sets self.data = None; must be assigned after.
+        self.data = CoordinatorData()
 
     async def _async_setup(self) -> None:
         """Set up API clients."""

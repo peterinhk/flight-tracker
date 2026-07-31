@@ -67,7 +67,7 @@ class FlightTrackerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     selector.NumberSelectorConfig(
                         min=-90,
                         max=90,
-                        step=0.0001,
+                        step=0.001,
                         mode=selector.NumberSelectorMode.BOX,
                     )
                 ),
@@ -75,7 +75,7 @@ class FlightTrackerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     selector.NumberSelectorConfig(
                         min=-180,
                         max=180,
-                        step=0.0001,
+                        step=0.001,
                         mode=selector.NumberSelectorMode.BOX,
                     )
                 ),
