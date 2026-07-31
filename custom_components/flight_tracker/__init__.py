@@ -14,11 +14,18 @@ from homeassistant.core import HomeAssistant
 from .const import DOMAIN as DOMAIN
 from .const import PLATFORMS
 from .coordinator import FlightTrackerCoordinator
+from .services import async_setup_services
 
 if TYPE_CHECKING:
-    from .coordinator import FlightTrackerCoordinator
+    from homeassistant.helpers.typing import ConfigType
 
 _LOGGER = logging.getLogger(__name__)
+
+
+async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
+    """Set up the Flight Tracker integration (services)."""
+    await async_setup_services(hass)
+    return True
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

@@ -548,7 +548,6 @@ dependencies = [
     { name = "frozenlist", marker = "python_full_version >= '3.14.2'" },
     { name = "multidict", marker = "python_full_version >= '3.14.2'" },
     { name = "propcache", version = "0.5.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.14.2'" },
-    { name = "typing-extensions", marker = "python_version < '0'" },
     { name = "yarl", version = "1.24.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.14.2'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/82/78/8ea7308cac6934de8c74a14f3d5f65d1c89287426688be79538d0e5c013d/aiohttp-3.14.1.tar.gz", hash = "sha256:307f2cff90a764d329e77040603fa032db89c5c24fdad50c4c15334cba744035", size = 7955794, upload-time = "2026-06-07T21:09:35.529Z" }
@@ -2239,7 +2238,7 @@ wheels = [
 
 [[package]]
 name = "flight-tracker"
-version = "1.0.4"
+version = "1.0.7"
 source = { editable = "." }
 dependencies = [
     { name = "aiofiles" },

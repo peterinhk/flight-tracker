@@ -3,10 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any
-
-if TYPE_CHECKING:
-    from .coordinator import FlightTrackerCoordinator
+from typing import Any
 
 from homeassistant.components.sensor import (  # type: ignore[import-untyped]
     SensorDeviceClass,
@@ -21,6 +18,8 @@ from homeassistant.const import (  # type: ignore[import-untyped]
 from homeassistant.core import HomeAssistant  # type: ignore[import-untyped]
 from homeassistant.helpers.entity_platform import AddEntitiesCallback  # type: ignore[import-untyped]
 from homeassistant.helpers.update_coordinator import CoordinatorEntity  # type: ignore[import-untyped]
+
+from .coordinator import FlightTrackerCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -63,7 +62,6 @@ class FlightTrackerBaseSensor(CoordinatorEntity[FlightTrackerCoordinator], Senso
 class TotalFlightsSensor(FlightTrackerBaseSensor):
     """Total flight count sensor."""
 
-    _attr_device_class = SensorDeviceClass.ENUM
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_native_unit_of_measurement = "flights"
     _attr_icon = "mdi:airplane"
@@ -108,7 +106,7 @@ class NearestFlightSensor(FlightTrackerBaseSensor):
             return None
 
         nearest = min(flights.values(), key=lambda f: f.distance_km if f.distance_km is not None else float("inf"))
-        return round(nearest.distance_km, 1) if nearest.distance_km else None
+        return round(nearest.distance_km, 1) if nearest.distance_km is not None else None
 
     @property
     def extra_state_attributes(self) -> dict[str, Any] | None:
@@ -147,14 +145,14 @@ class HighestFlightSensor(FlightTrackerBaseSensor):
         super().__init__(coordinator, "highest_flight")
 
     @property
-    def native_value(self) -> int | None:
+    def native_value(self) -> float | None:
         """Return highest altitude in feet."""
         flights = self.coordinator.data.flights
         if not flights:
             return None
 
         highest = max(flights.values(), key=lambda f: f.altitude if f.altitude is not None else -1)
-        return highest.altitude if highest.altitude else None
+        return highest.altitude if highest.altitude is not None else None
 
     @property
     def extra_state_attributes(self) -> dict[str, Any] | None:
@@ -196,7 +194,7 @@ class FastestFlightSensor(FlightTrackerBaseSensor):
             return None
 
         fastest = max(flights.values(), key=lambda f: f.speed if f.speed is not None else -1)
-        return fastest.speed if fastest.speed else None
+        return fastest.speed if fastest.speed is not None else None
 
     @property
     def extra_state_attributes(self) -> dict[str, Any] | None:

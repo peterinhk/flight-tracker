@@ -6,12 +6,11 @@ from homeassistant.const import Platform
 
 DOMAIN = "flight_tracker"
 NAME = "Flight Tracker"
-VERSION = "1.0.6"
+VERSION = "1.0.7"
 
 PLATFORMS: list[Platform] = [
     Platform.DEVICE_TRACKER,
     Platform.SENSOR,
-    Platform.BINARY_SENSOR,
 ]
 
 # Configuration keys

@@ -5,11 +5,26 @@ All notable changes to this project will be documented in this format.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.0.7] - 2026-07-31
 
 ### Fixed
+- Removed `Platform.BINARY_SENSOR` from `PLATFORMS`; no `binary_sensor.py` platform exists, so forwarding setup to it crashed integration load
+- Fixed circular import between `device_tracker.py` and `entity_manager.py`
+- Fixed `NameError` from using `CoordinatorEntity[FlightTrackerCoordinator]` as a base class while only importing `FlightTrackerCoordinator` under `TYPE_CHECKING` (in `sensor.py` and `device_tracker.py`)
+- Fixed `DataUpdateCoordinator` being passed a raw `int` for `update_interval` instead of a `timedelta`
+- Device tracker entities are now actually created/removed: `FlightTrackerEntityManager.update_entities()` was never invoked, so no per-flight map entities were ever added
+- Fixed `services.py` importing `FlightTrackerCoordinator` from the wrong module, looking up config entries via unused `hass.data`, and referencing a nonexistent `coordinator.enabled_sources` attribute
+- Services (`refresh`, `center_map`, `get_flight_image`) are now actually registered on startup; added missing `services.yaml`
+- Config flow: use `ConfigFlowResult` instead of the deprecated `FlowResult` return type
+- Removed incorrect "military" filter that matched ADS-B categories 3/4/5 (ordinary Large/High-Vortex/Heavy weight classes covering most commercial airliners), which hid nearly all real flights by default since `track_military` defaults to off
+- `TotalFlightsSensor` no longer declares an invalid `SensorDeviceClass.ENUM` alongside a numeric unit
+- Fixed falsy-zero bugs in `HighestFlightSensor`, `FastestFlightSensor`, and `NearestFlightSensor` that reported no data when altitude/speed/distance was exactly `0`
 - Config flow: aligned schema keys with const.py constants (CONF_TRACK_MILITARY, CONF_TRACK_GA) and translation keys
 - Added missing CONF_TRACK_GA field to config flow schema with proper default
+
+### Removed
+- Deleted unused duplicate API client implementations (`api/adsb_fi.py`, `api/adsb_lol.py`, `api/planespotters.py`) that diverged from and were never imported in favor of the ones in `api/__init__.py`
+- Removed stray compiled `.pyc` files that were still tracked in git despite `.gitignore`
 
 ## [1.0.6] - 2026-07-17
 

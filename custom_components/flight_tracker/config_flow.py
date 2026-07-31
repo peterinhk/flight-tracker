@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import voluptuous as vol  # type: ignore[import-untyped]
 from homeassistant import config_entries  # type: ignore[import-untyped]
+from homeassistant.config_entries import ConfigFlowResult  # type: ignore[import-untyped]
 from homeassistant.const import CONF_LATITUDE, CONF_LONGITUDE  # type: ignore[import-untyped]
-from homeassistant.data_entry_flow import FlowResult  # type: ignore[import-untyped]
 from homeassistant.helpers import selector  # type: ignore[import-untyped]
 
 from .const import (
@@ -38,7 +38,7 @@ class FlightTrackerConfigFlow(config_entries.ConfigFlow):
     MINOR_VERSION = 1
     domain = DOMAIN
 
-    async def async_step_user(self, user_input: dict | None = None) -> FlowResult:
+    async def async_step_user(self, user_input: dict | None = None) -> ConfigFlowResult:
         """Handle the initial step."""
         errors: dict[str, str] = {}
 
@@ -145,6 +145,6 @@ class FlightTrackerConfigFlow(config_entries.ConfigFlow):
             },
         )
 
-    async def async_step_reconfigure(self, user_input: dict | None = None) -> FlowResult:
+    async def async_step_reconfigure(self, user_input: dict | None = None) -> ConfigFlowResult:
         """Handle reconfiguration."""
         return await self.async_step_user(user_input)

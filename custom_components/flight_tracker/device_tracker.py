@@ -39,11 +39,11 @@ from .const import (
     DEVICE_TRACKER_ICON,
     DOMAIN,
 )
-from .entity_manager import FlightTrackerEntityManager
+from .coordinator import FlightTrackerCoordinator
 from .models import Flight
 
 if TYPE_CHECKING:
-    from .coordinator import FlightTrackerCoordinator
+    from .entity_manager import FlightTrackerEntityManager
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -54,11 +54,25 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up device tracker entities."""
+    # Imported locally: entity_manager imports FlightDeviceTracker from this module
+    # at load time, so importing it here (after this module has finished loading)
+    # avoids a circular import.
+    from .entity_manager import FlightTrackerEntityManager
+
     coordinator: FlightTrackerCoordinator = entry.runtime_data
 
     # Create entity manager
-    entity_manager = FlightTrackerEntityManager(hass, coordinator, async_add_entities)
-    coordinator._entity_manager = entity_manager
+    entity_manager: FlightTrackerEntityManager = FlightTrackerEntityManager(hass, coordinator, async_add_entities)
+    coordinator.set_entity_manager(entity_manager)
+
+    @callback
+    def _handle_coordinator_update() -> None:
+        hass.async_create_task(entity_manager.update_entities())
+
+    entry.async_on_unload(coordinator.async_add_listener(_handle_coordinator_update))
+
+    # Create entities for any flights already present on the coordinator
+    await entity_manager.update_entities()
 
 
 class FlightDeviceTracker(CoordinatorEntity[FlightTrackerCoordinator], TrackerEntity):

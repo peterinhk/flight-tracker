@@ -6,6 +6,7 @@ import asyncio
 import logging
 import math
 import time
+from datetime import timedelta
 from typing import TYPE_CHECKING, Any
 
 from homeassistant.config_entries import ConfigEntry  # type: ignore[import-untyped]
@@ -85,7 +86,7 @@ class FlightTrackerCoordinator(DataUpdateCoordinator[CoordinatorData]):
             hass,
             _LOGGER,
             name=DOMAIN,
-            update_interval=self.scan_interval,
+            update_interval=timedelta(seconds=self.scan_interval),
         )
 
     async def _async_setup(self) -> None:
@@ -307,11 +308,11 @@ class FlightTrackerCoordinator(DataUpdateCoordinator[CoordinatorData]):
                 continue
 
             # Category filter
-            if flight.category is not None:
-                if not self.track_military and flight.category in {3, 4, 5}:  # Heavy/military
-                    continue
-                if not self.track_ga and flight.category in {1, 2}:  # Light/Small
-                    continue
+            # Note: ADS-B emitter categories 3/4/5 (Large/High-Vortex/Heavy) are weight
+            # classes covering ordinary airliners (737, A320, 747, ...), not military
+            # aircraft, so they are intentionally not used to gate track_military here.
+            if flight.category is not None and not self.track_ga and flight.category in {1, 2}:  # Light/Small
+                continue
 
             filtered[hex_code] = flight
 

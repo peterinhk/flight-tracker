@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import voluptuous as vol  # type: ignore[import-untyped]
 from homeassistant.core import HomeAssistant, ServiceCall, SupportsResponse  # type: ignore[import-untyped]
@@ -16,7 +16,9 @@ from .const import (
     SERVICE_GET_FLIGHT_IMAGE,
     SERVICE_REFRESH,
 )
-from .models import FlightTrackerCoordinator  # type: ignore[attr-defined]
+
+if TYPE_CHECKING:
+    from .coordinator import FlightTrackerCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -50,9 +52,9 @@ async def async_setup_services(hass: HomeAssistant) -> None:
     async def handle_refresh(call: ServiceCall) -> None:
         """Handle refresh service call."""
         source = call.data.get("source")
-        for entry_id in hass.data.get(DOMAIN, {}):
-            coordinator: FlightTrackerCoordinator = hass.data[DOMAIN][entry_id].runtime_data
-            if source is None or source in coordinator.enabled_sources:
+        for entry in hass.config_entries.async_entries(DOMAIN):
+            coordinator: FlightTrackerCoordinator = entry.runtime_data
+            if source is None or source in coordinator.apis_enabled:
                 await coordinator.async_request_refresh()
 
     async def handle_center_map(call: ServiceCall) -> None:
@@ -81,8 +83,8 @@ async def async_setup_services(hass: HomeAssistant) -> None:
             return {"success": False, "error": "At least one identifier required"}
 
         # Find flight in any coordinator
-        for entry_id in hass.data.get(DOMAIN, {}):
-            coordinator: FlightTrackerCoordinator = hass.data[DOMAIN][entry_id].runtime_data
+        for entry in hass.config_entries.async_entries(DOMAIN):
+            coordinator: FlightTrackerCoordinator = entry.runtime_data
             flights = coordinator.data.flights
 
             flight = None
