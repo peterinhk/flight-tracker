@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this format.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2026-07-31
+
+### Fixed
+- `Error adding entity None for domain device_tracker with platform flight_tracker`: the Planespotters API returns `thumbnail`/`thumbnail_large` as objects (`{"src": "...", "size": {"width": .., "height": ..}}`), not bare URL strings — confirmed against the live API. `PlanespottersClient` was returning that raw object as `Flight.image_url`, which then got passed as a device's `configuration_url`. Home Assistant's device registry validates `configuration_url` and raises an uncaught `ValueError` for anything that isn't a real http(s) URL (only `DeviceInfoError` is caught by the platform helper, not `ValueError`) — since this happens before the entity's `entity_id` is assigned, it surfaced as "entity None" in the log, and that flight's device_tracker entity silently failed to add. Fixed `PlanespottersClient` to correctly extract `photo["thumbnail_large"]["src"]` (with a `thumbnail`/`image_url` fallback chain) and to sort by the real nested `size.width`/`size.height` fields instead of nonexistent `thumbnail_width`/`thumbnail_height` keys.
+- Added a defensive `configuration_url` validator in `device_tracker.py` so any future malformed URL degrades to "no configuration URL" instead of crashing that flight's entity addition.
+- Device tracker entities had a doubled name/entity_id bug (e.g. `device_tracker.ual123_ual123`, friendly name "UAL123 UAL123"): with `has_entity_name = True`, overriding the `name` property to return the callsign duplicated it against the device's own name (which is also the callsign). Removed the redundant `name` property; `_attr_name = None` already means "use the device name as-is".
+
+Reproduced and verified all three fixes end-to-end with `pytest-homeassistant-custom-component`, including checking the actual `DeviceEntry.configuration_url` and entity_id/friendly_name in the registry — not just that setup didn't raise.
+
 ## [1.1.0] - 2026-07-31
 
 ### Added

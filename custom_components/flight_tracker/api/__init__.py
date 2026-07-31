@@ -18,6 +18,44 @@ import aiohttp
 _LOGGER = logging.getLogger(__name__)
 
 
+def _photo_image_url(photo: dict[str, Any]) -> str | None:
+    """Extract a usable image URL from a Planespotters photo entry.
+
+    The Planespotters API returns thumbnail/thumbnail_large as objects
+    (e.g. {"src": "...", "size": {"width": .., "height": ..}}), not bare
+    URL strings. Passing the raw object through (e.g. as a device's
+    configuration_url) makes Home Assistant reject the entity with an
+    uncaught ValueError, since str(dict) is not a valid URL.
+    """
+    for key in ("thumbnail_large", "thumbnail"):
+        entry = photo.get(key)
+        if isinstance(entry, dict):
+            src = entry.get("src")
+            if isinstance(src, str) and src:
+                return src
+        elif isinstance(entry, str) and entry:
+            return entry
+    image_url = photo.get("image_url")
+    if isinstance(image_url, str) and image_url:
+        return image_url
+    return None
+
+
+def _photo_resolution(photo: dict[str, Any]) -> int:
+    """Return width * height for a Planespotters photo, for picking the largest."""
+    entry = photo.get("thumbnail_large")
+    if not isinstance(entry, dict):
+        return 0
+    size = entry.get("size")
+    if not isinstance(size, dict):
+        return 0
+    width = size.get("width", 0)
+    height = size.get("height", 0)
+    if not isinstance(width, int | float) or not isinstance(height, int | float):
+        return 0
+    return int(width) * int(height)
+
+
 @dataclass
 class FlightData:
     """Raw flight data from API."""
@@ -380,8 +418,8 @@ class PlanespottersClient:
                     photos = data.get("photos", [])
                     if photos:
                         # Get highest resolution photo
-                        best = max(photos, key=lambda p: p.get("thumbnail_width", 0) * p.get("thumbnail_height", 0))
-                        return best.get("thumbnail_large") or best.get("thumbnail") or best.get("image_url") or ""
+                        best = max(photos, key=_photo_resolution)
+                        return _photo_image_url(best)
                 elif resp.status == 404:
                     return None
         except Exception as err:
@@ -399,8 +437,8 @@ class PlanespottersClient:
                     data = await resp.json()
                     photos = data.get("photos", [])
                     if photos:
-                        best = max(photos, key=lambda p: p.get("thumbnail_width", 0) * p.get("thumbnail_height", 0))
-                        return best.get("thumbnail_large") or best.get("thumbnail") or best.get("image_url") or ""
+                        best = max(photos, key=_photo_resolution)
+                        return _photo_image_url(best)
                 elif resp.status == 404:
                     return None
         except Exception as err:

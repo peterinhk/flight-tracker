@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 from typing import TYPE_CHECKING, Any
+from urllib.parse import urlparse
 
 from homeassistant.components.device_tracker import (  # type: ignore[import-untyped]
     SourceType,
@@ -46,6 +47,23 @@ if TYPE_CHECKING:
     from .entity_manager import FlightTrackerEntityManager
 
 _LOGGER = logging.getLogger(__name__)
+
+_CONFIGURATION_URL_SCHEMES = {"http", "https", "homeassistant"}
+
+
+def _valid_configuration_url(url: str | None) -> str | None:
+    """Return url if it's a scheme+host URL device_registry accepts, else None.
+
+    Home Assistant's device registry raises an uncaught ValueError (which
+    aborts adding the entity) for a configuration_url that isn't a valid
+    http(s) URL, so this must be checked before it ever reaches DeviceInfo.
+    """
+    if not url:
+        return None
+    parsed = urlparse(url)
+    if parsed.scheme in _CONFIGURATION_URL_SCHEMES and parsed.hostname:
+        return url
+    return None
 
 
 async def async_setup_entry(
@@ -92,7 +110,12 @@ class FlightDeviceTracker(CoordinatorEntity[FlightTrackerCoordinator], TrackerEn
         super().__init__(coordinator)
         self._flight_hex = flight_hex
         self._attr_unique_id = f"{DOMAIN}_{flight_hex}"
-        self._attr_name = None  # Use flight callsign/hex as name via property
+        # has_entity_name=True + name=None means "use the device's name as-is"
+        # (set via device_info below). Overriding this with a name property
+        # that also returns the callsign/hex would make Home Assistant
+        # concatenate "<device name> <entity name>" into a doubled name like
+        # "UAL123 UAL123" and a doubled entity_id like device_tracker.ual123_ual123.
+        self._attr_name = None
 
     @property
     def flight(self) -> Flight | None:
@@ -113,13 +136,6 @@ class FlightDeviceTracker(CoordinatorEntity[FlightTrackerCoordinator], TrackerEn
         if self.flight:
             return self.flight.longitude
         return None
-
-    @property
-    def name(self) -> str | None:
-        """Return name for the flight."""
-        if self.flight and self.flight.callsign:
-            return self.flight.callsign.strip()
-        return self._flight_hex.upper()
 
     @property
     def extra_state_attributes(self) -> dict[str, Any] | None:
@@ -164,7 +180,7 @@ class FlightDeviceTracker(CoordinatorEntity[FlightTrackerCoordinator], TrackerEn
             manufacturer=f.operator or "Unknown",
             model=f.aircraft_type or "Unknown",
             entry_type=None,
-            configuration_url=f.image_url if f.image_url else None,
+            configuration_url=_valid_configuration_url(f.image_url),
         )
 
     @callback
