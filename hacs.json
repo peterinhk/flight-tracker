@@ -3,10 +3,10 @@
   "content_in_root": false,
   "filename": "custom_components/flight_tracker",
   "domains": ["flight_tracker"],
-  "version": "1.0.9",
+  "version": "1.1.0",
   "minimum_ha_version": "2024.1.0",
   "requirements": ["aiohttp>=3.9.0", "aiofiles>=23.0.0"],
-  "hass_dependencies": ["device_tracker", "sensor", "websocket_api"],
+  "hass_dependencies": ["device_tracker", "sensor", "websocket_api", "frontend", "http"],
   "translations": ["en"],
   "config_flow": true,
   "documentation": "https://github.com/peterjurgens/flight-tracker/blob/main/README.md",
@@ -34,6 +34,20 @@
         "icao24": {"description": "ICAO 24-bit hex address", "required": false}
       },
       "response": true
+    },
+    {
+      "name": "set_search_params",
+      "description": "Live-update search criteria (position, radius, altitude, filters) without reloading the integration",
+      "fields": {
+        "entry_id": {"description": "Config entry to target if more than one exists", "required": false},
+        "latitude": {"description": "New center latitude", "required": false},
+        "longitude": {"description": "New center longitude", "required": false},
+        "radius_km": {"description": "New tracking radius", "required": false},
+        "min_altitude": {"description": "Minimum altitude filter", "required": false},
+        "max_altitude": {"description": "Maximum altitude filter", "required": false},
+        "track_military": {"description": "Include military/heavy aircraft", "required": false},
+        "track_ga": {"description": "Include general aviation aircraft", "required": false}
+      }
     }
   ]
 }

@@ -93,6 +93,34 @@ class FlightTrackerCoordinator(DataUpdateCoordinator[CoordinatorData]):
 
     async def _async_setup(self) -> None:
         """Set up API clients."""
+        await self._async_recreate_clients()
+
+        if self.planespotters_email:
+            from pathlib import Path
+
+            cache_dir = Path(self.hass.config.path("storage", "flight_tracker"))
+            self.planespotters = PlanespottersClient(
+                self.session,
+                self.planespotters_email,
+                cache_dir,
+            )
+
+    async def _async_recreate_clients(self) -> None:
+        """(Re)create the REST/WebSocket API clients using the current search parameters.
+
+        Each client bakes latitude/longitude/radius into its own request URLs at
+        construction time, so changing those parameters live (see
+        async_update_search_params) requires discarding and rebuilding the clients
+        rather than mutating them in place.
+        """
+        for client in (self._adsb_fi, self._adsb_lol, self._adsb_com):
+            if client is not None:
+                await client.stop_websocket()
+
+        self._adsb_fi = None
+        self._adsb_lol = None
+        self._adsb_com = None
+
         if self.planespotters_email:
             user_agent = f"FlightTracker/1.0 ({self.planespotters_email})"
         else:
@@ -129,15 +157,46 @@ class FlightTrackerCoordinator(DataUpdateCoordinator[CoordinatorData]):
                 user_agent,
             )
 
-        if self.planespotters_email:
-            from pathlib import Path
+    async def async_update_search_params(
+        self,
+        *,
+        latitude: float | None = None,
+        longitude: float | None = None,
+        radius_km: float | None = None,
+        min_altitude: float | None = None,
+        max_altitude: float | None = None,
+        track_military: bool | None = None,
+        track_ga: bool | None = None,
+    ) -> None:
+        """Update live search parameters.
 
-            cache_dir = Path(self.hass.config.path("storage", "flight_tracker"))
-            self.planespotters = PlanespottersClient(
-                self.session,
-                self.planespotters_email,
-                cache_dir,
-            )
+        Only the parameters actually passed (non-None) are changed. This updates
+        in-memory state only (not the config entry), so it stays fast enough for
+        interactive controls like sliders; use the config flow to persist changes
+        that should survive a restart.
+        """
+        needs_client_rebuild = False
+
+        if latitude is not None and latitude != self.latitude:
+            self.latitude = latitude
+            needs_client_rebuild = True
+        if longitude is not None and longitude != self.longitude:
+            self.longitude = longitude
+            needs_client_rebuild = True
+        if radius_km is not None and radius_km != self.radius_km:
+            self.radius_km = radius_km
+            needs_client_rebuild = True
+        if min_altitude is not None:
+            self.min_altitude = min_altitude
+        if max_altitude is not None:
+            self.max_altitude = max_altitude
+        if track_military is not None:
+            self.track_military = track_military
+        if track_ga is not None:
+            self.track_ga = track_ga
+
+        if needs_client_rebuild:
+            await self._async_recreate_clients()
 
     async def _async_update_data(self) -> CoordinatorData:
         """Fetch data from REST APIs."""
@@ -353,6 +412,15 @@ class FlightTrackerCoordinator(DataUpdateCoordinator[CoordinatorData]):
             "by_category": categories,
             "by_source": by_source,
             "last_update": self.data.last_update,
+            "search_params": {
+                "latitude": self.latitude,
+                "longitude": self.longitude,
+                "radius_km": self.radius_km,
+                "min_altitude": self.min_altitude,
+                "max_altitude": self.max_altitude,
+                "track_military": self.track_military,
+                "track_ga": self.track_ga,
+            },
         }
 
     async def _handle_ws_flights(self, flights: list[Any]) -> None:

@@ -235,6 +235,44 @@
           "description": "ICAO 24-bit hex address"
         }
       }
+    },
+    "set_search_params": {
+      "name": "Set Search Parameters",
+      "description": "Live-update flight search criteria (position, radius, altitude, filters) without reloading the integration",
+      "fields": {
+        "entry_id": {
+          "name": "Flight Tracker instance",
+          "description": "Which configured location to update (only needed if you have more than one)"
+        },
+        "latitude": {
+          "name": "Latitude",
+          "description": "New center latitude"
+        },
+        "longitude": {
+          "name": "Longitude",
+          "description": "New center longitude"
+        },
+        "radius_km": {
+          "name": "Radius (km)",
+          "description": "New tracking radius"
+        },
+        "min_altitude": {
+          "name": "Minimum Altitude (ft)",
+          "description": "Filter out flights below this altitude"
+        },
+        "max_altitude": {
+          "name": "Maximum Altitude (ft)",
+          "description": "Filter out flights above this altitude"
+        },
+        "track_military": {
+          "name": "Track Military Aircraft",
+          "description": "Include military/heavy aircraft in results"
+        },
+        "track_ga": {
+          "name": "Track General Aviation",
+          "description": "Include light/small aircraft in results"
+        }
+      }
     }
   }
 }

@@ -6,7 +6,7 @@ from homeassistant.const import Platform
 
 DOMAIN = "flight_tracker"
 NAME = "Flight Tracker"
-VERSION = "1.0.9"
+VERSION = "1.1.0"
 
 PLATFORMS: list[Platform] = [
     Platform.DEVICE_TRACKER,
@@ -155,8 +155,12 @@ SENSOR_IMAGES_CACHED = "images_cached"
 # Services
 SERVICE_REFRESH = "refresh"
 SERVICE_CENTER_MAP = "center_map"
-SERVICE_SET_RADIUS = "set_radius"
+SERVICE_SET_SEARCH_PARAMS = "set_search_params"
 SERVICE_GET_FLIGHT_IMAGE = "get_flight_image"
+
+# Frontend card
+FRONTEND_STATIC_PATH = f"/{DOMAIN}_static"
+FRONTEND_CARD_FILENAME = "flight-tracker-card.js"
 
 # Update intervals
 MIN_SCAN_INTERVAL = 30  # seconds

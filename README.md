@@ -10,8 +10,10 @@ Track live flights from **ADSB.fi**, **ADSB.lol**, **ADSB.com** with **Planespot
 - 🌍 **Multiple data sources** — Aggregates ADSB.fi, ADSB.lol, ADSB.com for best coverage
 - 📸 **Aircraft images** — Fetches photos from Planespotters by hex/registration
 - 🗺️ **Native map integration** — Device tracker entities appear automatically on HA Map card
+- 🗂️ **Custom Lovelace card** — Map, live search filters, and per-flight details in one card (see below)
 - 📊 **Rich sensors** — Total flights, nearest, highest, fastest, category breakdown, source stats
 - ⚙️ **Fully configurable** — Radius, altitude filters, scan interval, API selection via UI
+- 🎚️ **Live search tuning** — Change radius/position/altitude filters at runtime without reloading
 - 🔌 **HACS compatible** — One-click install and updates
 - 🏠 **Native HA integration** — Config flow, device registry, entity registry, translations
 
@@ -72,8 +74,41 @@ After installation, configure via Settings → Devices & Services → Flight Tra
 | `flight_tracker.refresh` | Manually refresh flight data |
 | `flight_tracker.center_map` | Center map on coordinates |
 | `flight_tracker.get_flight_image` | Get aircraft image by callsign/reg/hex |
+| `flight_tracker.set_search_params` | Live-update latitude/longitude/radius/altitude/military/GA filters without reloading the integration |
 
-## Example Lovelace Card
+`set_search_params` only changes runtime state (it does not persist to the config entry), so it's meant for interactive controls — like the sliders in the custom card below — rather than one-off permanent changes. To change a setting permanently, use Settings → Devices & Services → Flight Tracker → Configure instead.
+
+## Flight Tracker Card
+
+The integration ships a custom Lovelace card (`custom_components/flight_tracker/www/flight-tracker-card.js`) that is registered automatically as a frontend resource on startup — no manual "Add Resource" step needed (if it doesn't show up, restart Home Assistant once after installing/upgrading).
+
+It includes:
+- An embedded map (Home Assistant's built-in map card) showing the flights you've selected
+- A multi-select checklist of every currently tracked nearby flight, to choose which ones appear on the map
+- Sliders for radius, minimum altitude, and maximum altitude
+- Latitude/longitude fields (with a "Use Home Assistant location" shortcut) and Yes/No selects for military and general-aviation filtering — all of which call `flight_tracker.set_search_params` live as you adjust them
+- An expandable details row per flight (registration, ICAO24, speed, heading, vertical rate, squawk, category, operator, origin/destination, distance, source, signal strength, photo)
+
+Add it to a dashboard in YAML mode:
+
+```yaml
+type: custom:flight-tracker-card
+entity: sensor.total_flights
+title: Flight Tracker
+show_map: true
+map_default_zoom: 9
+```
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `entity` | The integration's "Total Flights" sensor (required) | — |
+| `entry_id` | Config entry to target if you have more than one Flight Tracker instance | first/only entry |
+| `title` | Card title | `Flight Tracker` |
+| `show_map` | Embed the map | `true` |
+| `map_default_zoom` | Initial map zoom | `9` |
+| `map_height` | Map height in pixels | `300` |
+
+## Example Plain Map Card
 
 ```yaml
 type: map

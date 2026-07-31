@@ -85,6 +85,18 @@ class TotalFlightsSensor(FlightTrackerBaseSensor):
             "by_source": stats.get("by_source", {}),
             "last_update": stats.get("last_update"),
             "websocket_connected": self.coordinator.data.websocket_connected,
+            **stats.get(
+                "search_params",
+                {
+                    "latitude": self.coordinator.latitude,
+                    "longitude": self.coordinator.longitude,
+                    "radius_km": self.coordinator.radius_km,
+                    "min_altitude": self.coordinator.min_altitude,
+                    "max_altitude": self.coordinator.max_altitude,
+                    "track_military": self.coordinator.track_military,
+                    "track_ga": self.coordinator.track_ga,
+                },
+            ),
         }
 
 

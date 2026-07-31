@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this format.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-07-31
+
+### Added
+- New `flight_tracker.set_search_params` service to live-update latitude, longitude, radius, min/max altitude, and the military/GA filters without reloading the config entry. Position/radius changes rebuild the REST/WebSocket API clients (whose request URLs are otherwise fixed at construction); altitude/filter changes apply on the next fetch. Runtime-only by design (not persisted to the config entry), so it's fast enough for interactive controls.
+- `sensor.total_flights` now exposes the live search parameters (`latitude`, `longitude`, `radius_km`, `min_altitude`, `max_altitude`, `track_military`, `track_ga`) as attributes, so a UI can read current values without a separate API call.
+- New custom Lovelace card (`custom_components/flight_tracker/www/flight-tracker-card.js`), auto-registered as a frontend resource on startup (via `hass.http.async_register_static_paths` + `frontend.add_extra_js_url` — no manual "Add Resource" step). It provides an embedded map, a multi-select list of nearby flights to choose what's plotted on the map, sliders for radius/altitude, latitude/longitude fields, Yes/No selects for the military/GA filters (all live via `set_search_params`), and an expandable details view per flight.
+
+Verified end-to-end with `pytest-homeassistant-custom-component` against a real Home Assistant + frontend install: config flow → entry setup → static file actually served over HTTP → `add_extra_js_url` registration → `set_search_params` service call actually mutating the live coordinator, rebuilding API clients, and updating sensor attributes → the service's entry_id validation error path.
+
 ## [1.0.9] - 2026-07-31
 
 ### Fixed
