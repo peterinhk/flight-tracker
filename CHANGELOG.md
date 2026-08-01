@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this format.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2] - 2026-08-01
+
+### Fixed
+- Device tracker entities for flights that left range were never actually removed. `FlightTrackerEntityManager.update_entities()` runs on every coordinator update (every WS push / REST poll), and it unconditionally reset each missing flight's "stale since" timestamp to *now* on every single call — so the 5-minute stale threshold could never elapse; the clock kept getting pushed back before it ever reached the limit. Fixed to only stamp a flight as stale the first time it goes missing, and to clear that stamp if the flight comes back into range before removal.
+- Even once an entity was removed, `entity.async_remove()` alone only marks a *registered* entity (i.e. one with a `unique_id`, which ours always have) as `unavailable` — it does not delete the entity registry entry. That left a permanent "unavailable" ghost entity per flight in Settings → Devices & Services → Entities, which combined with the timer bug above is exactly why entities only ever accumulated. Now also explicitly purges the entity registry entry (`entity_registry.async_remove()`) so a stale flight's entity is actually gone, not just unavailable.
+
+Verified with `pytest-homeassistant-custom-component`: repeatedly driving coordinator updates while a flight is missing no longer resets its stale timer, the entity is fully removed (state is `None`, not just unavailable) once the threshold genuinely elapses, its registry entry is gone, and a flight that reappears before the threshold is correctly un-marked as stale instead of getting removed later on a stale timestamp.
+
 ## [1.1.1] - 2026-07-31
 
 ### Fixed
