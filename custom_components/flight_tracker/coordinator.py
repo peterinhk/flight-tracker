@@ -365,6 +365,12 @@ class FlightTrackerCoordinator(DataUpdateCoordinator[CoordinatorData]):
 
             # Altitude filter
             alt = flight.altitude or flight.altitude_geometric or 0
+            if not isinstance(alt, int | float):
+                # Defensive: a raw source that ever slips a non-numeric value
+                # (e.g. ADS-B's "ground" altitude string) through should not
+                # crash filtering for every flight.
+                _LOGGER.debug("Flight %s has non-numeric altitude %r; treating as 0", hex_code, alt)
+                alt = 0
             if alt < self.min_altitude or alt > self.max_altitude:
                 continue
 

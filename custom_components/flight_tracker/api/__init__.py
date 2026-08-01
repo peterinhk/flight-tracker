@@ -41,6 +41,30 @@ def _photo_image_url(photo: dict[str, Any]) -> str | None:
     return None
 
 
+def _coerce_altitude(value: Any) -> float | None:
+    """Normalize a raw ADS-B altitude reading to a float (or None).
+
+    ADS-B feeds (adsb.fi/adsb.lol, following the readsb/tar1090 JSON format)
+    report alt_baro (and occasionally alt_geom) as the literal string
+    "ground" when the aircraft has no valid barometric reading because it's
+    on the ground, instead of a numeric feet value. Left as-is, that string
+    reaches numeric comparisons (altitude filtering, "highest flight"
+    sorting) and raises TypeError: '<' not supported between instances of
+    'str' and 'float', which crashes the coordinator's first refresh with
+    "Failed setup, will retry".
+    """
+    if value is None or isinstance(value, int | float):
+        return value
+    if isinstance(value, str):
+        if value.strip().lower() == "ground":
+            return 0.0
+        try:
+            return float(value)
+        except ValueError:
+            return None
+    return None
+
+
 def _photo_resolution(photo: dict[str, Any]) -> int:
     """Return width * height for a Planespotters photo, for picking the largest."""
     entry = photo.get("thumbnail_large")
@@ -141,8 +165,8 @@ class BaseAPIClient:
                     t=ac.get("t", "").strip() or None,
                     lat=ac.get("lat"),
                     lon=ac.get("lon"),
-                    alt_baro=ac.get("alt_baro"),
-                    alt_geom=ac.get("alt_geom"),
+                    alt_baro=_coerce_altitude(ac.get("alt_baro")),
+                    alt_geom=_coerce_altitude(ac.get("alt_geom")),
                     gs=ac.get("gs"),
                     track=ac.get("track"),
                     baro_rate=ac.get("baro_rate"),

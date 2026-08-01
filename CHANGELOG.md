@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this format.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.3] - 2026-08-01
+
+### Fixed
+- `Failed setup, will retry: '<' not supported between instances of 'str' and 'float'`: ADS-B feeds (following the readsb/tar1090 JSON format used by adsb.fi/adsb.lol) report `alt_baro` — and occasionally `alt_geom` — as the literal string `"ground"` when an aircraft has no valid barometric reading because it's on the ground, instead of a numeric feet value. That string then hit the altitude range filter's `<`/`>` comparison and the "highest flight" sensor's `max()` sort, both of which assume numeric altitudes, crashing the coordinator's very first refresh on every retry. Fixed `_parse_flights` to normalize `"ground"` to `0.0` (and any other non-numeric value to `None`) at the point raw API data is parsed, for both REST and WebSocket data on both adsb.fi and adsb.lol. Also added a defensive fallback in the altitude filter itself so any other non-numeric value that ever slips through can't crash filtering for every flight.
+
+Verified against the real HA config flow + coordinator refresh pipeline with a mocked ADS-B response containing `"alt_baro": "ground"`: the entry now reaches `ConfigEntryState.LOADED` instead of `SETUP_RETRY`, and the flight's altitude is correctly normalized to `0.0`.
+
 ## [1.1.2] - 2026-08-01
 
 ### Fixed
