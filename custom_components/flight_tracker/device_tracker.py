@@ -27,6 +27,8 @@ from .const import (
     ATTR_DISTANCE_KM,
     ATTR_HEADING,
     ATTR_ICAO24,
+    ATTR_IMAGE_LINK,
+    ATTR_IMAGE_PHOTOGRAPHER,
     ATTR_IMAGE_URL,
     ATTR_LAST_SEEN,
     ATTR_OPERATOR,
@@ -161,6 +163,8 @@ class FlightDeviceTracker(CoordinatorEntity[FlightTrackerCoordinator], TrackerEn
             ATTR_ORIGIN: f.origin,
             ATTR_DESTINATION: f.destination,
             ATTR_IMAGE_URL: f.image_url,
+            ATTR_IMAGE_PHOTOGRAPHER: f.image_photographer,
+            ATTR_IMAGE_LINK: f.image_link,
             ATTR_LAST_SEEN: f.last_seen,
             ATTR_SOURCE_API: f.source_api,
             ATTR_RSSI: f.rssi,
@@ -180,7 +184,7 @@ class FlightDeviceTracker(CoordinatorEntity[FlightTrackerCoordinator], TrackerEn
             manufacturer=f.operator or "Unknown",
             model=f.aircraft_type or "Unknown",
             entry_type=None,
-            configuration_url=_valid_configuration_url(f.image_url),
+            configuration_url=_valid_configuration_url(f.image_link or f.image_url),
         )
 
     @callback

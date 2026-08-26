@@ -249,12 +249,21 @@ class FlightTrackerCoordinator(DataUpdateCoordinator[CoordinatorData]):
                     for f in filtered_flights.values()
                 ]
             )
-            # Update image URLs
+            # Populate image fields from whatever's already cached. This must
+            # stay a synchronous cache lookup (no network I/O): a real
+            # Planespotters fetch here would block this entire refresh -
+            # every flight's position update, not just the one needing a
+            # photo - for up to the fetch's 10s timeout. preload_images()
+            # above already fires off any needed fetches in the background,
+            # so the cache fills in in time for a later cycle.
             for flight in filtered_flights.values():
-                if flight.hex:
-                    image_url = await self.planespotters.get_image_url(flight.hex, flight.registration)
-                    if image_url:
-                        flight.image_url = image_url
+                if not flight.hex:
+                    continue
+                cached = self.planespotters.get_cached_image(flight.hex)
+                if cached:
+                    flight.image_url = cached.get("url")
+                    flight.image_photographer = cached.get("photographer")
+                    flight.image_link = cached.get("link")
 
         # Clean up stale entities
         if self._entity_manager:
@@ -339,6 +348,8 @@ class FlightTrackerCoordinator(DataUpdateCoordinator[CoordinatorData]):
             "aircraft_type",
             "operator",
             "image_url",
+            "image_photographer",
+            "image_link",
             "last_seen",
             "last_seen_pos",
             "source_api",

@@ -65,6 +65,22 @@ def _coerce_altitude(value: Any) -> float | None:
     return None
 
 
+def _photo_credit(photo: dict[str, Any]) -> tuple[str | None, str | None]:
+    """Extract photographer name and photo-page link from a Planespotters photo entry.
+
+    Planespotters' API terms expect attribution for community-submitted
+    photos; these are surfaced to the UI alongside the image itself rather
+    than silently dropped.
+    """
+    photographer = photo.get("photographer")
+    if not isinstance(photographer, str) or not photographer.strip():
+        photographer = None
+    link = photo.get("link")
+    if not isinstance(link, str) or not link.strip():
+        link = None
+    return photographer, link
+
+
 def _photo_resolution(photo: dict[str, Any]) -> int:
     """Return width * height for a Planespotters photo, for picking the largest."""
     entry = photo.get("thumbnail_large")
@@ -397,42 +413,63 @@ class PlanespottersClient:
             "negative_entries": len(self._negative_cache),
         }
 
+    def get_cached_image(self, hex_code: str) -> dict[str, Any] | None:
+        """Return a cached image entry (url/photographer/link) with no network I/O.
+
+        Used on the coordinator's hot update path, where an actual fetch
+        would block every flight's position update (not just the one needing
+        a photo) for up to the fetch's 10s timeout. preload_images() is what
+        actually populates the cache, in the background.
+        """
+        entry = self._cache.get(hex_code.lower())
+        if entry and entry.get("url") and time.time() - entry.get("timestamp", 0) < 86400:  # 24h
+            return entry
+        return None
+
     async def get_image_url(self, hex_code: str, registration: str | None = None) -> str | None:
         """Get image URL for aircraft by hex or registration."""
+        info = await self._get_image_info(hex_code, registration)
+        return str(info["url"]) if info else None
+
+    async def _get_image_info(self, hex_code: str, registration: str | None = None) -> dict[str, Any] | None:
+        """Get the full cached/fetched image entry (url, photographer, link)."""
         hex_code = hex_code.lower()
 
-        # Check positive cache
-        if hex_code in self._cache:
-            entry = self._cache[hex_code]
-            url = entry.get("url")
-            if url and time.time() - entry.get("timestamp", 0) < 86400:  # 24h
-                return str(url)
+        cached = self.get_cached_image(hex_code)
+        if cached:
+            return cached
 
         # Check negative cache
         if hex_code in self._negative_cache and time.time() - self._negative_cache[hex_code] < 3600:  # 1h
             return None
 
-        # Try registration first if available
+        photo = None
         if registration:
-            url = await self._fetch_by_registration(registration)
-            if url:
-                self._cache[hex_code] = {"url": url, "reg": registration, "timestamp": time.time()}
-                await self._save_cache()
-                return url
+            photo = await self._fetch_by_registration(registration)
+        if photo is None:
+            photo = await self._fetch_by_hex(hex_code)
 
-        # Try by hex
-        url = await self._fetch_by_hex(hex_code)
-        if url:
-            self._cache[hex_code] = {"url": url, "reg": registration, "timestamp": time.time()}
-            await self._save_cache()
-            return url
+        if photo:
+            url = _photo_image_url(photo)
+            if url:
+                photographer, link = _photo_credit(photo)
+                entry = {
+                    "url": url,
+                    "photographer": photographer,
+                    "link": link,
+                    "reg": registration,
+                    "timestamp": time.time(),
+                }
+                self._cache[hex_code] = entry
+                await self._save_cache()
+                return entry
 
         # Cache negative result
         self._negative_cache[hex_code] = time.time()
         return None
 
-    async def _fetch_by_hex(self, hex_code: str) -> str | None:
-        """Fetch image by hex code."""
+    async def _fetch_by_hex(self, hex_code: str) -> dict[str, Any] | None:
+        """Fetch the best available photo entry by hex code."""
         url = f"https://api.planespotters.net/pub/photos/hex/{hex_code.upper()}"
         headers = {"User-Agent": f"FlightTracker/1.0 ({self._email})"}
 
@@ -440,19 +477,18 @@ class PlanespottersClient:
             async with self._session.get(url, headers=headers, timeout=aiohttp.ClientTimeout(total=10)) as resp:
                 if resp.status == 200:
                     data = await resp.json()
-                    photos = data.get("photos", [])
+                    photos: list[dict[str, Any]] = data.get("photos", [])
                     if photos:
-                        # Get highest resolution photo
-                        best = max(photos, key=_photo_resolution)
-                        return _photo_image_url(best)
+                        best: dict[str, Any] = max(photos, key=_photo_resolution)
+                        return best
                 elif resp.status == 404:
                     return None
         except Exception as err:
             _LOGGER.debug("Planespotters fetch by hex failed: %s", err)
         return None
 
-    async def _fetch_by_registration(self, registration: str) -> str | None:
-        """Fetch image by registration."""
+    async def _fetch_by_registration(self, registration: str) -> dict[str, Any] | None:
+        """Fetch the best available photo entry by registration."""
         url = f"https://api.planespotters.net/pub/photos/reg/{registration}"
         headers = {"User-Agent": f"FlightTracker/1.0 ({self._email})"}
 
@@ -460,10 +496,10 @@ class PlanespottersClient:
             async with self._session.get(url, headers=headers, timeout=aiohttp.ClientTimeout(total=10)) as resp:
                 if resp.status == 200:
                     data = await resp.json()
-                    photos = data.get("photos", [])
+                    photos: list[dict[str, Any]] = data.get("photos", [])
                     if photos:
-                        best = max(photos, key=_photo_resolution)
-                        return _photo_image_url(best)
+                        best: dict[str, Any] = max(photos, key=_photo_resolution)
+                        return best
                 elif resp.status == 404:
                     return None
         except Exception as err:

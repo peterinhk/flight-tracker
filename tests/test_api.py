@@ -10,7 +10,7 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from custom_components.flight_tracker.api import ADSBFiClient, ADSBLolClient, PlanespottersClient
+from custom_components.flight_tracker.api import ADSBFiClient, ADSBLolClient, PlanespottersClient, _photo_credit
 
 
 class TestADSBFiClient:
@@ -154,3 +154,53 @@ class TestPlanespottersClient:
         stats = client.get_stats()
         assert stats["total_entries"] == 3
         assert stats["entries_with_images"] == 2
+
+    def test_get_cached_image_hit(self, client):
+        """Test the synchronous, no-network cache accessor returns a fresh entry."""
+        import time
+
+        client._cache["a1b2c3"] = {
+            "url": "http://example.com/img.jpg",
+            "photographer": "Jane Doe",
+            "link": "http://example.com/photo/1",
+            "timestamp": time.time(),
+        }
+        entry = client.get_cached_image("A1B2C3")
+        assert entry is not None
+        assert entry["url"] == "http://example.com/img.jpg"
+        assert entry["photographer"] == "Jane Doe"
+
+    def test_get_cached_image_miss(self, client):
+        """Test the cache accessor returns None for an uncached hex."""
+        assert client.get_cached_image("deadbe") is None
+
+    def test_get_cached_image_expired(self, client):
+        """Test the cache accessor treats an expired entry as a miss."""
+        import time
+
+        client._cache["a1b2c3"] = {
+            "url": "http://example.com/img.jpg",
+            "timestamp": time.time() - 100000,
+        }
+        assert client.get_cached_image("a1b2c3") is None
+
+
+class TestPhotoCredit:
+    """Test the photographer/link extraction helper."""
+
+    def test_extracts_photographer_and_link(self):
+        photographer, link = _photo_credit(
+            {"photographer": "Jane Doe", "link": "https://www.planespotters.net/photo/123"}
+        )
+        assert photographer == "Jane Doe"
+        assert link == "https://www.planespotters.net/photo/123"
+
+    def test_missing_fields_return_none(self):
+        photographer, link = _photo_credit({})
+        assert photographer is None
+        assert link is None
+
+    def test_blank_fields_return_none(self):
+        photographer, link = _photo_credit({"photographer": "  ", "link": ""})
+        assert photographer is None
+        assert link is None

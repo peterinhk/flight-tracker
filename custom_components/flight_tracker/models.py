@@ -34,6 +34,8 @@ class Flight:
     origin: str | None = None
     destination: str | None = None
     image_url: str | None = None
+    image_photographer: str | None = None
+    image_link: str | None = None
     last_seen: float | None = None
     last_seen_pos: float | None = None
     source_api: str = "unknown"

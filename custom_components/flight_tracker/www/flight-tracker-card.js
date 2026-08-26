@@ -350,7 +350,29 @@
           ${expanded
             ? html`
                 <div class="flight-details">
-                  ${a.image_url ? html`<img class="flight-image" src="${a.image_url}" alt="${flightLabel(stateObj)}" />` : ""}
+                  <div class="flight-photo">
+                    ${a.image_url
+                      ? html`
+                          <a
+                            class="flight-photo-link"
+                            href="${a.image_link || a.image_url}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title="View full photo on Planespotters.net"
+                          >
+                            <img class="flight-image" src="${a.image_url}" alt="${flightLabel(stateObj)}" loading="lazy" />
+                          </a>
+                          <div class="flight-photo-credit">
+                            📷 ${a.image_photographer ? a.image_photographer + " · " : ""}Planespotters.net
+                          </div>
+                        `
+                      : html`
+                          <div class="flight-photo-placeholder">
+                            <ha-icon icon="mdi:airplane"></ha-icon>
+                            <span>No photo yet</span>
+                          </div>
+                        `}
+                  </div>
                   <div class="flight-details-grid">
                     <div><span class="label">Registration</span>${a.registration || "-"}</div>
                     <div><span class="label">ICAO24</span>${a.icao24 || "-"}</div>
@@ -694,11 +716,51 @@
           gap: 12px;
           flex-wrap: wrap;
         }
+        .flight-photo {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          width: 180px;
+          flex-shrink: 0;
+        }
+        .flight-photo-link {
+          display: block;
+          border-radius: 8px;
+          overflow: hidden;
+          box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+          transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .flight-photo-link:hover,
+        .flight-photo-link:focus-visible {
+          transform: scale(1.03);
+          box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
+        }
         .flight-image {
-          max-width: 160px;
-          max-height: 110px;
-          border-radius: 6px;
+          display: block;
+          width: 100%;
+          height: 130px;
           object-fit: cover;
+        }
+        .flight-photo-credit {
+          font-size: 0.72em;
+          color: var(--secondary-text-color);
+          text-align: center;
+        }
+        .flight-photo-placeholder {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 4px;
+          height: 130px;
+          border: 1px dashed var(--divider-color);
+          border-radius: 8px;
+          color: var(--secondary-text-color);
+          font-size: 0.8em;
+        }
+        .flight-photo-placeholder ha-icon {
+          --mdc-icon-size: 28px;
+          opacity: 0.5;
         }
         .flight-details-grid {
           flex: 1;
