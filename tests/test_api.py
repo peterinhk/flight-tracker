@@ -1,5 +1,7 @@
 """Tests for API clients."""
 
+import asyncio
+import contextlib
 import sys
 from pathlib import Path
 
@@ -183,6 +185,38 @@ class TestPlanespottersClient:
             "timestamp": time.time() - 100000,
         }
         assert client.get_cached_image("a1b2c3") is None
+
+    @pytest.mark.asyncio
+    async def test_preload_images_queues_new_hex(self, client):
+        """A new, uncached hex gets marked pending so it isn't double-queued."""
+        await client.preload_images([{"hex": "aa1111", "registration": None}])
+        assert "aa1111" in client._pending
+        # Let the background task run to completion so pytest doesn't warn
+        # about a destroyed pending task at teardown.
+        for task in list(client._background_tasks):
+            task.cancel()
+            with contextlib.suppress(asyncio.CancelledError):
+                await task
+
+    @pytest.mark.asyncio
+    async def test_preload_images_does_not_requeue_pending_hex(self, client):
+        """A hex already marked pending (an in-flight/queued fetch) isn't
+        queued again by a later call - this is the fix for the bug where
+        firing one concurrent task per flight burst-triggered Planespotters'
+        rate limiting and left every flight but the first without a photo."""
+        client._pending.add("aa1111")
+        await client.preload_images([{"hex": "aa1111", "registration": None}])
+        assert client._background_tasks == set()
+
+    @pytest.mark.asyncio
+    async def test_preload_images_skips_fresh_cache_entry(self, client):
+        """A hex with a fresh cache entry isn't queued at all."""
+        import time
+
+        client._cache["aa1111"] = {"url": "http://example.com/img.jpg", "timestamp": time.time()}
+        await client.preload_images([{"hex": "aa1111", "registration": None}])
+        assert "aa1111" not in client._pending
+        assert client._background_tasks == set()
 
 
 class TestPhotoCredit:

@@ -376,6 +376,7 @@ class PlanespottersClient:
         self._cache: dict[str, dict[str, Any]] = {}
         self._negative_cache: dict[str, float] = {}  # hex -> timestamp
         self._background_tasks: set[asyncio.Task] = set()
+        self._pending: set[str] = set()  # hex codes already queued/in-flight
         self._load_cache()
 
     def _load_cache(self) -> None:
@@ -507,22 +508,49 @@ class PlanespottersClient:
         return None
 
     async def preload_images(self, flights: list[dict]) -> None:
-        """Preload images for multiple flights (fire and forget)."""
-        # Deduplicate by hex
-        seen = set()
+        """Queue image fetches for flights not yet cached (fire and forget).
+
+        Fetches are processed one at a time by a single background task
+        (_process_queue), not as N independent concurrent tasks: firing every
+        flight's fetch at once as a burst of simultaneous requests is exactly
+        what triggered Planespotters' rate limiting in practice - only the
+        first request would succeed, and everything else failed and got
+        negative-cached for an hour, permanently masking itself as "no photo
+        available" for the rest of that hour instead of a transient failure.
+        """
+        to_queue: list[tuple[str, str | None]] = []
+        seen: set[str] = set()
         for flight in flights:
             hex_code = flight.get("hex", "").lower()
-            if hex_code and hex_code not in seen:
-                seen.add(hex_code)
-                # Check if we need to fetch
-                if hex_code not in self._cache or time.time() - self._cache[hex_code].get("timestamp", 0) > 86400:
-                    # Fire and forget - don't wait. A reference is kept in
-                    # _background_tasks (and dropped on completion) because an
-                    # unreferenced asyncio task can be garbage-collected before
-                    # it finishes running.
-                    task = asyncio.create_task(self.get_image_url(hex_code, flight.get("registration")))
-                    self._background_tasks.add(task)
-                    task.add_done_callback(self._background_tasks.discard)
+            if not hex_code or hex_code in seen or hex_code in self._pending:
+                continue
+            seen.add(hex_code)
+            if hex_code not in self._cache or time.time() - self._cache[hex_code].get("timestamp", 0) > 86400:
+                to_queue.append((hex_code, flight.get("registration")))
+
+        if not to_queue:
+            return
+
+        self._pending.update(hex_code for hex_code, _ in to_queue)
+
+        # A reference is kept in _background_tasks (and dropped on completion)
+        # because an unreferenced asyncio task can be garbage-collected before
+        # it finishes running.
+        task = asyncio.create_task(self._process_queue(to_queue))
+        self._background_tasks.add(task)
+        task.add_done_callback(self._background_tasks.discard)
+
+    async def _process_queue(self, queue: list[tuple[str, str | None]]) -> None:
+        """Fetch queued images one at a time, pausing between requests to
+        stay well clear of Planespotters' rate limiting."""
+        for hex_code, registration in queue:
+            try:
+                await self.get_image_url(hex_code, registration)
+            except Exception as err:
+                _LOGGER.debug("Background image fetch failed for %s: %s", hex_code, err)
+            finally:
+                self._pending.discard(hex_code)
+            await asyncio.sleep(1)
 
 
 class ADSBComClient(BaseAPIClient):

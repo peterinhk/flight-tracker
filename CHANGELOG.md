@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this format.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.5] - 2026-08-26
+
+### Fixed
+- Only the first tracked flight ever got a photo; every other flight was stuck on "No photo yet" indefinitely. `preload_images()` fired one independent `asyncio.create_task` per flight needing a photo, all launched essentially simultaneously — a burst of concurrent requests against Planespotters' free community API. In practice only the first connection succeeded; every other request failed and got negative-cached for a full hour, which is why it looked permanently stuck rather than resolving on a later refresh. Replaced the per-flight concurrent tasks with a single background task that processes the queue of needed fetches one at a time, one second apart, plus a `_pending` set so a flight already queued/in-flight isn't re-queued by a later coordinator tick.
+
+### Added
+- The card's refresh control is now a clearly labeled "Force Update" button (previously a bare, easy-to-miss refresh icon), with a spinning icon and "Updating…" label for ~1.5s after a click so it's obvious the click registered.
+
 ## [1.1.4] - 2026-08-26
 
 ### Fixed

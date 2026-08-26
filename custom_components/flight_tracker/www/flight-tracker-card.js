@@ -60,6 +60,7 @@
         _deselected: { state: true },
         _expanded: { state: true },
         _draft: { state: true },
+        _refreshing: { state: true },
       };
     }
 
@@ -68,6 +69,7 @@
       this._deselected = new Set();
       this._expanded = new Set();
       this._draft = {};
+      this._refreshing = false;
       this._mapCardEl = null;
       this._mapCardPromise = null;
     }
@@ -266,7 +268,14 @@
     }
 
     _refresh() {
+      var _this = this;
+      this._refreshing = true;
       this._callService(SERVICE_REFRESH, {});
+      // Purely visual feedback that the click registered - the service call
+      // itself doesn't report back when the refresh actually completes.
+      setTimeout(function () {
+        _this._refreshing = false;
+      }, 1500);
     }
 
     _ensureMapCard() {
@@ -421,13 +430,15 @@
             <div class="header-actions">
               <span class="flight-count">${flights.length} nearby</span>
               <button
-                class="icon-button"
-                title="Refresh now"
+                class="icon-button force-update-button"
+                title="Force a data update now"
+                ?disabled=${this._refreshing}
                 @click=${function () {
                   _this._refresh();
                 }}
               >
-                <ha-icon icon="mdi:refresh"></ha-icon>
+                <ha-icon icon="mdi:refresh" class="${this._refreshing ? "spin" : ""}"></ha-icon>
+                <span>${this._refreshing ? "Updating…" : "Force Update"}</span>
               </button>
             </div>
           </div>
@@ -613,6 +624,35 @@
           display: flex;
           align-items: center;
           padding: 4px;
+        }
+        .force-update-button {
+          border: 1px solid var(--divider-color);
+          border-radius: 6px;
+          gap: 6px;
+          padding: 5px 10px;
+          font-size: 0.85em;
+          font-weight: 500;
+          transition: background 0.15s ease, opacity 0.15s ease;
+        }
+        .force-update-button:hover:not(:disabled) {
+          background: var(--secondary-background-color, rgba(127, 127, 127, 0.15));
+        }
+        .force-update-button:disabled {
+          cursor: default;
+          opacity: 0.7;
+        }
+        @keyframes ft-spin {
+          to {
+            transform: rotate(360deg);
+          }
+        }
+        .force-update-button ha-icon.spin {
+          animation: ft-spin 0.8s linear infinite;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .force-update-button ha-icon.spin {
+            animation: none;
+          }
         }
         .card-content {
           padding: 16px;
