@@ -15,6 +15,8 @@ from typing import Any
 import aiofiles
 import aiohttp
 
+from ..const import VERSION
+
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -377,6 +379,12 @@ class PlanespottersClient:
         self._negative_cache: dict[str, float] = {}  # hex -> timestamp
         self._background_tasks: set[asyncio.Task] = set()
         self._pending: set[str] = set()  # hex codes already queued/in-flight
+        # Planespotters' API names "AppName/Version (+contact-uri)" as its
+        # required User-Agent convention (seen directly in a live 403
+        # response) - the previous "AppName/Version (bare-email)" format
+        # didn't match it. Not confirmed as the sole cause of fetch failures,
+        # but a real compliance gap worth closing regardless.
+        self._user_agent = f"flight-tracker/{VERSION} (+mailto:{email})"
         self._load_cache()
 
     def _load_cache(self) -> None:
@@ -472,7 +480,7 @@ class PlanespottersClient:
     async def _fetch_by_hex(self, hex_code: str) -> dict[str, Any] | None:
         """Fetch the best available photo entry by hex code."""
         url = f"https://api.planespotters.net/pub/photos/hex/{hex_code.upper()}"
-        headers = {"User-Agent": f"FlightTracker/1.0 ({self._email})"}
+        headers = {"User-Agent": self._user_agent}
 
         try:
             async with self._session.get(url, headers=headers, timeout=aiohttp.ClientTimeout(total=10)) as resp:
@@ -484,6 +492,13 @@ class PlanespottersClient:
                         return best
                 elif resp.status == 404:
                     return None
+                else:
+                    # Anything else (403/429/5xx) previously fell through
+                    # completely silently, with no log at all - not even at
+                    # debug level - making a systemic block indistinguishable
+                    # from "this aircraft just has no photo."
+                    body = await resp.text()
+                    _LOGGER.warning("Planespotters photo lookup by hex failed (HTTP %s): %s", resp.status, body[:200])
         except Exception as err:
             _LOGGER.debug("Planespotters fetch by hex failed: %s", err)
         return None
@@ -491,7 +506,7 @@ class PlanespottersClient:
     async def _fetch_by_registration(self, registration: str) -> dict[str, Any] | None:
         """Fetch the best available photo entry by registration."""
         url = f"https://api.planespotters.net/pub/photos/reg/{registration}"
-        headers = {"User-Agent": f"FlightTracker/1.0 ({self._email})"}
+        headers = {"User-Agent": self._user_agent}
 
         try:
             async with self._session.get(url, headers=headers, timeout=aiohttp.ClientTimeout(total=10)) as resp:
@@ -503,6 +518,11 @@ class PlanespottersClient:
                         return best
                 elif resp.status == 404:
                     return None
+                else:
+                    body = await resp.text()
+                    _LOGGER.warning(
+                        "Planespotters photo lookup by registration failed (HTTP %s): %s", resp.status, body[:200]
+                    )
         except Exception as err:
             _LOGGER.debug("Planespotters fetch by reg failed: %s", err)
         return None

@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this format.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.6] - 2026-08-26
+
+### Fixed
+- Photos were still only appearing for the first tracked flight after 1.1.5's fix to the concurrent-fetch burst. Direct testing against the live Planespotters API surfaced two real, independent problems on top of that: (1) any non-200/404 response (e.g. a 403) was falling through completely silently - not even logged at debug level - so a systemic block was indistinguishable from "this aircraft just has no photo"; (2) our User-Agent (`FlightTracker/1.0 (bare-email)`) didn't match the exact convention Planespotters' own API names in its error text (`AppName/Version (+contact-uri)`). Fixed the User-Agent to that documented format and now log a warning with the actual HTTP status and response body for anything unexpected, so a real block is visible without needing debug logging turned on. Not confirmed as the sole cause (testing from this environment's cloud IP is a poor proxy for a home network's reputation with Cloudflare), but a real compliance gap regardless — check the Home Assistant log after updating for a `Planespotters photo lookup ... failed (HTTP ...)` warning if photos are still missing, which will show exactly what's being rejected and why.
+- Fixed `codeowners` in `manifest.json` and several documentation/repository URLs across `manifest.json`, `hacs.json`, `pyproject.toml`, and `README.md` that pointed at a different, non-existent GitHub account than the one this repository actually lives under.
+
 ## [1.1.5] - 2026-08-26
 
 ### Fixed

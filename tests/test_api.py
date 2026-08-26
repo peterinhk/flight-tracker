@@ -2,6 +2,7 @@
 
 import asyncio
 import contextlib
+import logging
 import sys
 from pathlib import Path
 
@@ -104,6 +105,41 @@ class TestPlanespottersClient:
         """Create client instance with temp cache."""
         session = AsyncMock()
         return PlanespottersClient(session, "test@example.com", tmp_path)
+
+    def test_user_agent_format(self, client):
+        """User-Agent must follow Planespotters' documented convention
+        ('AppName/Version (+contact-uri)') - the previous bare-email format
+        got a 403 directly naming this requirement."""
+        assert client._user_agent.startswith("flight-tracker/")
+        assert "(+mailto:test@example.com)" in client._user_agent
+
+    @pytest.mark.asyncio
+    async def test_fetch_by_hex_logs_unexpected_status(self, tmp_path, caplog):
+        """A non-200/404 response (e.g. a 403 block) must be logged - it
+        previously fell through completely silently, making a systemic block
+        indistinguishable from 'this aircraft has no photo.'"""
+
+        class _FakeResponse:
+            status = 403
+
+            async def text(self):
+                return '{"error": "403 Forbidden"}'
+
+            async def __aenter__(self):
+                return self
+
+            async def __aexit__(self, *args):
+                return False
+
+        class _FakeSession:
+            def get(self, *args, **kwargs):
+                return _FakeResponse()
+
+        client = PlanespottersClient(_FakeSession(), "test@example.com", tmp_path)
+        with caplog.at_level(logging.WARNING):
+            result = await client._fetch_by_hex("a1b2c3")
+        assert result is None
+        assert any("403" in record.message for record in caplog.records)
 
     @pytest.mark.asyncio
     async def test_cache_operations(self, client):
