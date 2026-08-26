@@ -359,6 +359,7 @@ class PlanespottersClient:
         self._cache_file = cache_dir / "images.json"
         self._cache: dict[str, dict[str, Any]] = {}
         self._negative_cache: dict[str, float] = {}  # hex -> timestamp
+        self._background_tasks: set[asyncio.Task] = set()
         self._load_cache()
 
     def _load_cache(self) -> None:
@@ -479,8 +480,13 @@ class PlanespottersClient:
                 seen.add(hex_code)
                 # Check if we need to fetch
                 if hex_code not in self._cache or time.time() - self._cache[hex_code].get("timestamp", 0) > 86400:
-                    # Fire and forget - don't wait
-                    asyncio.create_task(self.get_image_url(hex_code, flight.get("registration")))
+                    # Fire and forget - don't wait. A reference is kept in
+                    # _background_tasks (and dropped on completion) because an
+                    # unreferenced asyncio task can be garbage-collected before
+                    # it finishes running.
+                    task = asyncio.create_task(self.get_image_url(hex_code, flight.get("registration")))
+                    self._background_tasks.add(task)
+                    task.add_done_callback(self._background_tasks.discard)
 
 
 class ADSBComClient(BaseAPIClient):

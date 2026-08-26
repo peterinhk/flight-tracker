@@ -31,7 +31,7 @@ from .const import (
 )
 
 
-class FlightTrackerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+class FlightTrackerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignore[call-arg]
     """Handle a config flow for Flight Tracker."""
 
     VERSION = 1
