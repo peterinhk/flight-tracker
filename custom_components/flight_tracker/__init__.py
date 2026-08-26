@@ -16,7 +16,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.setup import async_setup_component
 
 from .const import DOMAIN as DOMAIN
-from .const import FRONTEND_CARD_FILENAME, FRONTEND_STATIC_PATH, PLATFORMS
+from .const import FRONTEND_CARD_FILENAME, FRONTEND_STATIC_PATH, PLATFORMS, VERSION
 from .coordinator import FlightTrackerCoordinator
 from .services import async_setup_services
 
@@ -45,7 +45,11 @@ async def _async_register_frontend_card(hass: HomeAssistant) -> None:
         [StaticPathConfig(FRONTEND_STATIC_PATH, str(www_path), cache_headers=False)]
     )
 
-    add_extra_js_url(hass, f"{FRONTEND_STATIC_PATH}/{FRONTEND_CARD_FILENAME}")
+    # The version query string busts browser/HTTP caches of this fixed URL
+    # after an update - without it, a browser that already fetched the old
+    # module can keep serving it indefinitely, silently masking any update
+    # to the card (including a fix to a previously broken version of it).
+    add_extra_js_url(hass, f"{FRONTEND_STATIC_PATH}/{FRONTEND_CARD_FILENAME}?v={VERSION}")
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

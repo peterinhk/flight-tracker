@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this format.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.4] - 2026-08-26
+
+### Fixed
+- Coordinator refreshes were blocked on Planespotters image fetches: after already firing `preload_images()` in the background, `_async_update_data` turned around and synchronously `await`ed `get_image_url()` again for every tracked flight. On a cache miss that's a real network call with up to a 10s timeout, run sequentially per flight — one new aircraft entering range (or several during a busy period) could stall position updates for every flight, not just the one needing a photo. Split `PlanespottersClient` into an async fetch-and-cache path (used only by the background preload) and a new synchronous, no-I/O `get_cached_image()` used by the coordinator's hot path, so a refresh cycle never blocks on Planespotters.
+- The frontend card's script URL (`add_extra_js_url`) was registered with a fixed path and no cache-busting query string, so a browser that had already fetched the module could keep serving a stale cached copy indefinitely — silently masking any update to the card, including this release's fixes. The URL is now suffixed with `?v=<integration version>`, so every version bump forces a fresh fetch.
+
+### Added
+- Aircraft photos now carry photographer credit and a link back to the photo's Planespotters.net page (`Flight.image_photographer` / `Flight.image_link`), previously discarded entirely. The card's photo is now a clickable link through to that page with a credit line underneath, and shows a "No photo yet" placeholder instead of a blank gap when no image is cached yet. A flight device's `configuration_url` now points at the photo page instead of the raw image file.
+
 ## [1.1.3] - 2026-08-01
 
 ### Fixed
