@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this format.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+- `uv.lock` was stale and self-contradictory: it still recorded the project at 1.1.3 and resolved against `requires-python = ">=3.11"`, even though `pyproject.toml` raised the floor to 3.12 back in the 1.0.x line (the integration needs `StaticPathConfig`, so Home Assistant >=2024.7, so Python 3.12). The lock therefore carried 30 package entries that could never be installed - duplicate Python-3.11-only resolution branches plus 8 packages required only by the ancient Home Assistant that was the newest thing resolvable on 3.11 - and any `uv sync` rewrote the file mid-session. Regenerated with `uv lock`: no dependency was added or upgraded (verified - zero new name/version pairs), only unreachable branches pruned. Two tests in `tests/test_version.py` now pin the lockfile's recorded project version and Python floor so it cannot drift again.
+
+### Changed
+- The release workflow can now be run manually (`workflow_dispatch`) with a version input, not only by pushing a `v*` tag; on a manual run the release action creates the tag itself. The version/tag is resolved once and shared by both trigger paths. The hacs.json version check also moved to *before* the release is created - it previously ran as the final step, so a version mismatch was only reported after the release had already been published.
+
 ## [1.1.8] - 2026-08-27
 
 ### Changed

@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release, e.g. 1.1.9 (must match hacs.json)'
+        required: true
+        type: string
 
 jobs:
   release:
@@ -16,6 +22,59 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      # A tag push carries the version in the ref; a manual run takes it as an
+      # input. Everything downstream reads these outputs, so both trigger paths
+      # behave identically from here on.
+      - name: Resolve version and tag
+        id: resolve
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            version="${INPUT_VERSION#v}"
+          else
+            version="${GITHUB_REF_NAME#v}"
+          fi
+          if ! printf '%s' "$version" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::Version '$version' is not in X.Y.Z form"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
+          echo "Releasing v$version"
+
+      # On a manual run the release action creates the tag, so refuse rather
+      # than silently rewriting an existing release.
+      - name: Ensure the tag is not already taken
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          TAG: ${{ steps.resolve.outputs.tag }}
+        run: |
+          if git rev-parse -q --verify "refs/tags/${TAG}" >/dev/null; then
+            echo "::error::Tag ${TAG} already exists. Bump the version instead."
+            exit 1
+          fi
+          echo "${TAG} is free"
+
+      # Checked before anything is published: this used to be the final step,
+      # so a mismatch was only reported once the release already existed.
+      - name: Validate HACS version matches the release
+        env:
+          VERSION: ${{ steps.resolve.outputs.version }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+
+          version = os.environ["VERSION"]
+          with open("hacs.json") as f:
+              hacs = json.load(f)
+          assert hacs["version"] == version, (
+              f"Version mismatch: hacs.json={hacs['version']} but releasing {version}"
+          )
+          print(f"Version {version} matches hacs.json")
+          PY
 
       - name: Require Validate to have passed for this commit
         env:
@@ -44,30 +103,21 @@ jobs:
         run: hatch build
 
       - name: Create HACS zip
+        env:
+          VERSION: ${{ steps.resolve.outputs.version }}
         run: |
           mkdir -p dist/hacs
           cd custom_components
-          zip -r ../dist/hacs/flight_tracker-${GITHUB_REF_NAME#v}.zip flight_tracker/
+          zip -r "../dist/hacs/flight_tracker-${VERSION}.zip" flight_tracker/
           cd ..
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: ${{ steps.resolve.outputs.tag }}
           files: |
             dist/*
             dist/hacs/*
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Validate HACS version
-        run: |
-          python -c "
-          import json
-          import re
-          with open('hacs.json') as f:
-              hacs = json.load(f)
-          version = re.search(r'v(.+)', '${{ github.ref_name }}').group(1)
-          assert hacs['version'] == version, f'Version mismatch: hacs.json={hacs[\"version\"]} tag={version}'
-          print(f'Version {version} matches hacs.json')
-          "
