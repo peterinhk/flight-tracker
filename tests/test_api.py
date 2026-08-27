@@ -1,5 +1,8 @@
 """Tests for API clients."""
 
+import asyncio
+import contextlib
+import logging
 import sys
 from pathlib import Path
 
@@ -103,6 +106,41 @@ class TestPlanespottersClient:
         session = AsyncMock()
         return PlanespottersClient(session, "test@example.com", tmp_path)
 
+    def test_user_agent_format(self, client):
+        """User-Agent must follow Planespotters' documented convention
+        ('AppName/Version (+contact-uri)') - the previous bare-email format
+        got a 403 directly naming this requirement."""
+        assert client._user_agent.startswith("flight-tracker/")
+        assert "(+mailto:test@example.com)" in client._user_agent
+
+    @pytest.mark.asyncio
+    async def test_fetch_by_hex_logs_unexpected_status(self, tmp_path, caplog):
+        """A non-200/404 response (e.g. a 403 block) must be logged - it
+        previously fell through completely silently, making a systemic block
+        indistinguishable from 'this aircraft has no photo.'"""
+
+        class _FakeResponse:
+            status = 403
+
+            async def text(self):
+                return '{"error": "403 Forbidden"}'
+
+            async def __aenter__(self):
+                return self
+
+            async def __aexit__(self, *args):
+                return False
+
+        class _FakeSession:
+            def get(self, *args, **kwargs):
+                return _FakeResponse()
+
+        client = PlanespottersClient(_FakeSession(), "test@example.com", tmp_path)
+        with caplog.at_level(logging.WARNING):
+            result = await client._fetch_by_hex("a1b2c3")
+        assert result is None
+        assert any("403" in record.message for record in caplog.records)
+
     @pytest.mark.asyncio
     async def test_cache_operations(self, client):
         """Test cache load/save."""
@@ -183,6 +221,38 @@ class TestPlanespottersClient:
             "timestamp": time.time() - 100000,
         }
         assert client.get_cached_image("a1b2c3") is None
+
+    @pytest.mark.asyncio
+    async def test_preload_images_queues_new_hex(self, client):
+        """A new, uncached hex gets marked pending so it isn't double-queued."""
+        await client.preload_images([{"hex": "aa1111", "registration": None}])
+        assert "aa1111" in client._pending
+        # Let the background task run to completion so pytest doesn't warn
+        # about a destroyed pending task at teardown.
+        for task in list(client._background_tasks):
+            task.cancel()
+            with contextlib.suppress(asyncio.CancelledError):
+                await task
+
+    @pytest.mark.asyncio
+    async def test_preload_images_does_not_requeue_pending_hex(self, client):
+        """A hex already marked pending (an in-flight/queued fetch) isn't
+        queued again by a later call - this is the fix for the bug where
+        firing one concurrent task per flight burst-triggered Planespotters'
+        rate limiting and left every flight but the first without a photo."""
+        client._pending.add("aa1111")
+        await client.preload_images([{"hex": "aa1111", "registration": None}])
+        assert client._background_tasks == set()
+
+    @pytest.mark.asyncio
+    async def test_preload_images_skips_fresh_cache_entry(self, client):
+        """A hex with a fresh cache entry isn't queued at all."""
+        import time
+
+        client._cache["aa1111"] = {"url": "http://example.com/img.jpg", "timestamp": time.time()}
+        await client.preload_images([{"hex": "aa1111", "registration": None}])
+        assert "aa1111" not in client._pending
+        assert client._background_tasks == set()
 
 
 class TestPhotoCredit:

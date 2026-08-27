@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "flight-tracker"
-version = "1.1.5"
+version = "1.1.7"
 description = "Home Assistant custom integration for live flight tracking with ADSB.fi, ADSB.lol, ADSB.com and Planespotters"
 readme = "README.md"
 license = {text = "MIT"}
@@ -44,11 +44,11 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/peterjurgens/flight-tracker"
-Repository = "https://github.com/peterjurgens/flight-tracker"
-Issues = "https://github.com/peterjurgens/flight-tracker/issues"
-Documentation = "https://github.com/peterjurgens/flight-tracker/blob/main/README.md"
-Changelog = "https://github.com/peterjurgens/flight-tracker/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/peterinhk/flight-tracker"
+Repository = "https://github.com/peterinhk/flight-tracker"
+Issues = "https://github.com/peterinhk/flight-tracker/issues"
+Documentation = "https://github.com/peterinhk/flight-tracker/blob/main/README.md"
+Changelog = "https://github.com/peterinhk/flight-tracker/blob/main/CHANGELOG.md"
 
 [tool.hatch.build.targets.wheel]
 packages = ["custom_components/flight_tracker"]
