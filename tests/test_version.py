@@ -47,6 +47,31 @@ def test_pyproject_version_matches_const() -> None:
     assert pyproject["project"]["version"] == VERSION
 
 
+def test_uv_lock_matches_project_version() -> None:
+    """uv.lock records the project's own version; a bump must regenerate it.
+
+    Without this the lockfile drifts silently - it sat at 1.1.3 while
+    pyproject.toml reached 1.1.7 - and `uv sync` rewrites it mid-session.
+    Run `uv lock` after bumping the version.
+    """
+    lock = tomllib.loads((ROOT / "uv.lock").read_text())
+    entry = next(p for p in lock["package"] if p["name"] == "flight-tracker")
+    assert entry["version"] == VERSION
+
+
+def test_uv_lock_python_floor_matches_pyproject() -> None:
+    """The lockfile must be resolved against the declared Python floor.
+
+    The floor is >=3.12 because the integration uses StaticPathConfig /
+    async_register_static_paths, which need Home Assistant >=2024.7, which
+    needs Python 3.12. A lockfile resolved for an older floor carries
+    dependency branches that can never be installed.
+    """
+    lock = tomllib.loads((ROOT / "uv.lock").read_text())
+    pyproject = tomllib.loads((ROOT / "pyproject.toml").read_text())
+    assert lock["requires-python"] == pyproject["project"]["requires-python"]
+
+
 def test_changelog_documents_current_version() -> None:
     """Every released version needs its own CHANGELOG entry."""
     changelog = (ROOT / "CHANGELOG.md").read_text()
