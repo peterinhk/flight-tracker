@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this format.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.8] - 2026-08-27
+
+### Changed
+- Version bump only - no code changes since 1.1.7. 1.1.7 was merged to `main` but never tagged, so no release was ever published for it and nobody could install it; this release is what actually ships 1.1.7's fix (the Lovelace card never registering as a custom element). The bump also moves the card script URL's cache-busting query string, so browsers re-fetch the fixed card instead of serving a cached copy from 1.1.6 or earlier. See the 1.1.7 entry below for what was fixed.
+
 ## [1.1.7] - 2026-08-27
 
 ### Fixed
