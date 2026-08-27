@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this format.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.5] - 2026-08-27
+
+### Fixed
+- The Lovelace card could not be found at all ("Custom element doesn't exist: flight-tracker-card"), both in the card picker and in any dashboard already using it. `flight-tracker-card.js` resolved Home Assistant's bundled LitElement at module scope and *threw* if `hui-view` / `hui-masonry-view` / `home-assistant-main` were not defined yet. Because the integration registers the script with `add_extra_js_url()`, the browser evaluates it during frontend boot - before any Lovelace element exists - so that throw aborted the module before it ever reached `customElements.define()`, and the card tag was never registered. The module now waits (via `customElements.whenDefined()`) for the first of those elements to appear and defines the card then; Lovelace re-renders cards whose tag is defined late, so nothing is lost by deferring. The card-picker entry is registered immediately, since it does not depend on LitElement, and a failure to borrow LitElement's `html`/`css` helpers now logs an explicit console error instead of failing silently.
+
+### Added
+- CI now checks the Lovelace card. Nothing in the pipeline had ever loaded `flight-tracker-card.js`, so a card that fails outright still shipped green: `validate.yml` gained a `node --check` syntax pass plus `tests/card_smoke_test.mjs`, which evaluates the card against a stub browser with no Lovelace elements defined (the `add_extra_js_url` case that broke it), then defines `hui-view` afterwards and asserts the card tag registers, extends Home Assistant's LitElement, and exposes `setConfig`/`getCardSize`/`render`. It also covers the already-loaded and evaluated-twice cases. The test fails against the 1.1.4 card.
+- `tests/test_version.py` pins `const.VERSION` to `manifest.json`, `hacs.json`, `pyproject.toml` and a matching CHANGELOG entry, and asserts the bundled card file exists where `__init__.py` serves it. Since 1.1.4, `VERSION` also builds the card URL's cache-busting query string, so version drift means an update browsers never re-fetch.
+
 ## [1.1.4] - 2026-08-26
 
 ### Fixed

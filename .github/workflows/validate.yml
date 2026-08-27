@@ -47,3 +47,17 @@ jobs:
 
       - name: Run tests
         run: pytest tests/ -v
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # The Lovelace card is plain JS that nothing above ever loads, so a
+      # breakage in it reaches users as "Custom element doesnt exist"
+      # without any check here failing first.
+      - name: Check card syntax
+        run: node --check custom_components/flight_tracker/www/flight-tracker-card.js
+
+      - name: Card smoke test
+        run: node tests/card_smoke_test.mjs
